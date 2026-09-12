@@ -29,11 +29,25 @@
 | Stage | Document |
 |---|---|
 | Rent a GPU and mine on it | **This guide** |
-| Mining concepts, pool credentials, own-node route | → [guide.md](guide.md) |
-| Use your own Windows PC instead | → [ubuntu.md](ubuntu.md) |
-| Network overview and links | [readme.md](readme.md) |
+| Mining concepts, the A/B decision, own-node route | → [guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#the-two-routes--a-or-b) |
+| Use your own Windows PC instead | → [ubuntu.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.md) |
+| Network overview and links | [README.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.md) |
 
 This sets up a plain NVIDIA Ubuntu image, `quanpool-miner`, and a supervisor program so the miner restarts by itself. It does **not** set up your own node, put your seed phrase anywhere, or change a rig you already run at home.
+
+**How this relates to the main guide.** guide.md splits mining into two routes: **Part A** (pool only) and **Part B** (your own node). This document is a **self-contained Part A variant for rented hardware** — it replaces guide.md Step 2 and Steps A1–A6 with the container equivalents, because a rented box has no persistent identity, no static address and no reason to sync a chain.
+
+```text
+guide.md  Step 1   create a wallet          ← the one thing you still do there
+      ↓
+vast.md   Step 1 → 11                       ← everything else happens here
+      ↓
+vast.md   Cost Control and Teardown         ← where this route ends
+```
+
+**Starts here:** with a `qz…` address from [guide.md → Step 1](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#step-1--create-a-wallet). That is the only prerequisite.
+**Ends at:** [Step 11](#step-11--verify-on-the-pool), when your worker shows up on the pool page — followed by [Cost Control and Teardown](#cost-control-and-teardown), which is not optional reading on metered hardware.
+**Never touched here:** `quantus-node`, chain sync, inbound firewall rules, wormhole inner hash. If you want that route instead, you want your own machine and [Part B](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#part-b--your-own-node-official-path).
 
 > ⚠️ **Nothing secret goes on a rented machine.** The box needs exactly two values: `qzYOURADDRESS.workername` and the pool's TLS pin. Your 24 words, wallet file and node inner hash stay off it. Assume the host operator can see every file and every process.
 
@@ -69,7 +83,7 @@ Three consequences shape this whole guide:
 2. **`systemd` usually does not work.** Long-running processes go under the image's **supervisor**.
 3. **Storage is disposable.** Without an attached volume, **Destroy deletes everything** — miner, token file, logs.
 
-Rented mining only makes sense as pool mining: a rented box has no persistent identity, no static address and no reason to sync a chain, so [Part B of guide.md](guide.md#part-b--your-own-node-official-path) is not the route here.
+Rented mining only makes sense as pool mining: a rented box has no persistent identity, no static address and no reason to sync a chain, so [Part B of guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#part-b--your-own-node-official-path) is not the route here.
 
 ---
 
@@ -194,7 +208,7 @@ chmod u+x quanpool-miner
 ./quanpool-miner benchmark --cpu-workers 0 --duration 20
 ```
 
-Compare the result against Step 2. Roughly 100 MH/s on a modern card means you are not on the CUDA path — see the table in [guide.md](guide.md#step-a2--benchmark-the-card).
+Compare the result against Step 2. Roughly 100 MH/s on a modern card means you are not on the CUDA path — see the table in [guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#step-a2--benchmark-the-card).
 
 > The `gpu-list` subcommand was removed in 6.1+. Count cards with `nvidia-smi -L`.
 
@@ -318,6 +332,18 @@ Open [quanpool.com](https://quanpool.com/), paste your `qz…` address and press
 
 `hs` is reported in **kH/s** — `440000` ≈ 440 MH/s. A two-card instance shows two GPU rows, and rejects should stay at zero. A burst of `SOLUTION LOST` / stale messages in the first seconds is normal; after a few minutes you should see steady `SHARE FOUND` lines.
 
+### Finish Line
+
+The rented route is complete when all five are true:
+
+1. `supervisorctl status quanpool-miner` reports `RUNNING`.
+2. `nvidia-smi` shows 95–100% utilisation at roughly the hash rate you expected from Step 2.
+3. `hive-stats` shows accepted shares climbing and rejects at zero.
+4. The worker is visible on the pool lookup page under your `qz…` address, with a name no other machine uses.
+5. You know the hourly price and have decided when you will Destroy the instance.
+
+There is nothing further to install. What remains is money management, below.
+
 ---
 
 ## Cost Control and Teardown
@@ -371,9 +397,9 @@ Renting the same offer again is a fresh install unless you attached a volume —
 
 | Goal | Document |
 |---|---|
-| Mining concepts, pool details, own-node route | [guide.md](guide.md) |
-| Convert a Windows PC into a mining machine | [ubuntu.md](ubuntu.md) |
-| Network facts and links | [readme.md](readme.md) |
+| Mining concepts, pool details, own-node route | [guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md) |
+| Convert a Windows PC into a mining machine | [ubuntu.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.md) |
+| Network facts and links | [README.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.md) |
 
 ---
 
