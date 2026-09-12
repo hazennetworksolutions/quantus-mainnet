@@ -19,7 +19,7 @@
 
 > **Author:** HazenNetworkSolutions
 > **Network:** Quantus Mainnet (`--chain mainnet`)
-> **Versions:** `quantus-node` v1.0.1+ · `quantus-miner` v4.1.x · pool miner 6.2.0
+> **Versions:** `quantus-node` v1.0.1+ · `quantus-miner` v4.2.x · pool miner 6.2.0
 > **Last Updated:** September 2026
 
 ---
@@ -214,8 +214,8 @@ All official links (docs, releases, wallet, explorer, telemetry, pool) are colle
 
 | Your situation | Start with |
 |---|---|
-| Windows PC, NVIDIA card, no Linux yet | **[ubuntu.md](ubuntu.md)** — it ends at Step 2 below |
-| Renting a GPU by the hour | **[vast.md](vast.md)** — a self-contained Part A variant |
+| Windows PC, NVIDIA card, no Linux yet | **[ubuntu.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.md)** — it ends at Step 2 below |
+| Renting a GPU by the hour | **[vast.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.md)** — a self-contained Part A variant |
 | Ubuntu or macOS with a working GPU driver | Continue to Step 1 |
 | Just want the overview and links | [README.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.md) |
 
@@ -250,7 +250,7 @@ quantus wallet create --name mining
 
 Confirm the proprietary NVIDIA driver is active before installing any miner. A miner on the wrong driver path silently runs 4–6× slow.
 
-> No Linux yet? Do **[ubuntu.md](ubuntu.md)** first — it hands back here. On a rented GPU the driver is already injected by the host: use **[vast.md](vast.md)** instead of this guide.
+> No Linux yet? Do **[ubuntu.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.md)** first — it hands back here. On a rented GPU the driver is already injected by the host: use **[vast.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.md)** instead of this guide.
 
 ```bash
 sudo apt update && sudo apt upgrade -y
@@ -427,7 +427,7 @@ gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'no
 gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'
 ```
 
-> A rented container usually has no working `systemd`. Use the image's process supervisor instead — see [vast.md](vast.md).
+> A rented container usually has no working `systemd`. Use the image's process supervisor instead — see [vast.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.md).
 
 ### Step A6 — Verify on the Pool
 
@@ -493,7 +493,7 @@ Pin an explicit pair instead of letting two `latest` tags drift apart:
 
 ```bash
 ./quantus-mining.sh config set NODE_VERSION v1.0.1
-./quantus-mining.sh config set MINER_VERSION v4.1.1
+./quantus-mining.sh config set MINER_VERSION v4.2.0
 ./quantus-mining.sh stop
 ./quantus-mining.sh setup --force
 ./quantus-mining.sh start -d
@@ -515,7 +515,7 @@ tar -xzf quantus-node-v1.0.1-x86_64-unknown-linux-gnu.tar.gz
 chmod +x quantus-node
 ./quantus-node --version
 
-wget https://github.com/Quantus-Network/quantus-miner/releases/download/v4.1.1/quantus-miner-linux-x86_64 -O quantus-miner
+wget https://github.com/Quantus-Network/quantus-miner/releases/download/v4.2.0/quantus-miner-linux-x86_64 -O quantus-miner
 chmod +x quantus-miner
 ```
 
@@ -728,7 +728,7 @@ Several miners can pay into the **same** `qz…` address; PPLNS shares add up.
 
 - Give every machine a **different worker name**. Reusing one name makes two rigs collide and one disappears from the pool.
 - You do not need to stop the home rig to add a second one.
-- Never copy your seed to a rented machine. A rented box only needs `qzADDRESS.worker` and the TLS pin — see [vast.md](vast.md).
+- Never copy your seed to a rented machine. A rented box only needs `qzADDRESS.worker` and the TLS pin — see [vast.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.md).
 - On the Part B side the equivalent is several miners dialling one node on `9833` over a VPN. The node broadcasts jobs to all of them and the first valid result wins.
 
 ---
@@ -812,8 +812,8 @@ Stop the miner, then the node. Keep `chains/mainnet/` if you might come back; it
 
 | Goal | Document |
 |---|---|
-| Turn a Windows PC into a mining machine | [ubuntu.md](ubuntu.md) |
-| Rent a GPU by the hour | [vast.md](vast.md) |
+| Turn a Windows PC into a mining machine | [ubuntu.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.md) |
+| Rent a GPU by the hour | [vast.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.md) |
 | Network facts, links and route comparison | [README.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.md) |
 
 ---
