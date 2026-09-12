@@ -23,14 +23,14 @@
 
 ---
 
-## 📚 Buradan Başla
+## Buradan Başla
 
-Üç doküman, tek bir karar. Önce kararı oku — yanlış şeyi kurmaktan kurtarır.
+Dört doküman. Merakına göre değil, elindeki donanıma göre seç — yanlış şeyi kurmaktan kurtarır.
 
 | Durumun buysa | Şunu oku |
 |---|---|
-| Ubuntu ya da macOS hazır, sürücü çalışıyor | **[guide.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.tr.md)** — ana madencilik rehberi |
-| NVIDIA kartlı Windows PC, henüz Linux yok | **[ubuntu.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.tr.md)** → sonra [guide.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.tr.md) |
+| Ubuntu ya da macOS hazır, GPU sürücüsü çalışıyor | **[guide.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.tr.md)** — ana madencilik rehberi |
+| NVIDIA kartlı Windows PC, henüz Linux yok | **[ubuntu.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.tr.md)** → sonra guide.tr.md |
 | Donanım yok — saatlik GPU kiralıyorsun | **[vast.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.tr.md)** |
 | Havuz mu, kendi node mu, karar veremedin | [guide.tr.md → Hangi Yol](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.tr.md#hangi-yol--a-mı-b-mi) |
 
@@ -38,9 +38,9 @@
 
 ---
 
-## 🧭 İki Yol, Tek Paragrafta
+## İki Yol
 
-Madencilik için iki iş gerekiyor: zinciri takip edip blok adayı üreten bir **node**, ve nonce öğüten bir **madenci**. **Yol A**'da node'u havuz işletiyor, sen yalnızca madenciyi çalıştırıyorsun — senkron yok, açık port yok, gelir düzenli bir pay akışı olarak geliyor. **Yol B**'de ikisini de kendin çalıştırıyorsun — tam senkron, sıfır komisyon, tam kontrol ve kazandığın her blokta ödülün tamamı. Cüzdan aynı, GPU'nun yaptığı iş aynı; yani karar geri alınabilir. Tam karşılaştırma ve karar kontrol listesi: [guide.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.tr.md#hangi-yol--a-mı-b-mi).
+Madencilik için iki iş gerekir: zinciri takip edip blok adayı üreten bir **node**, ve nonce öğüten bir **madenci**. **Yol A**'da node'u havuz işletir, sen yalnızca madenciyi çalıştırırsın. **Yol B**'de ikisini de kendin çalıştırırsın — tam senkron, komisyon yok, kazandığın blokta ödülün tamamı. Cüzdan aynı, GPU'nun yaptığı iş aynı; karar geri alınabilir.
 
 | Yol | Ne çalıştırıyorsun | Komisyon | Gelirin şekli | Kime uygun |
 |---|---|---|---|---|
@@ -50,15 +50,15 @@ Madencilik için iki iş gerekiyor: zinciri takip edip blok adayı üreten bir *
 
 ---
 
-## 📋 Quantus Nedir
+## Quantus Nedir
 
 Substrate üzerine kurulu, akıllı kontrat platformu değil **değer saklama aracı** olarak tasarlanmış post-kuantum bir Proof-of-Work Layer 1. Post-kuantum imzalar (ML-DSA / Dilithium) ilk bloktan itibaren devrede ve **QPoW**, SHA-256'nın yerine çift Poseidon2 hash'i koyuyor; böylece madencilik işi ZK ispatlarının içinde doğrulanabiliyor. Poseidon2'nin sebebi devre verimliliği, ekstra kuantum direnci değil.
 
-Mainnet **9 Eylül 2026**'da açıldı. Stake şartı ve validator kümesi yok — GPU'su olan herkes kazabilir. Ödüller yalnızca seed ifadenden türeyen **wormhole adreslerine** gidiyor, yani madencilik geliri varsayılan olarak gizli ve ayrı bir talep adımı gerektirmiyor.
+Mainnet **9 Eylül 2026**'da açıldı. Stake şartı ve validator kümesi yok — GPU'su olan herkes kazabilir. Ödüller yalnızca seed ifadenden türeyen **wormhole adreslerine** gider, yani madencilik geliri varsayılan olarak gizlidir ve ayrı bir talep adımı gerektirmez.
 
 ---
 
-## ⚙️ Ağ Bilgileri
+## Ağ Bilgileri
 
 | Alan | Değer |
 |---|---|
@@ -76,13 +76,13 @@ Mainnet **9 Eylül 2026**'da açıldı. Stake şartı ve validator kümesi yok �
 | Madenci protokolü | ALPN `quantus-miner/2` — node ile madenci uyuşmak zorunda |
 | Portlar | `30333/TCP` herkese açık · `9833/UDP`, `9944`, `9615`, `9900` sadece localhost |
 
-Hash hızı **GPU'dan ve madenci derlemesinden** gelir — disk boyutundan ya da CPU önbelleğinden değil. QPoW VRAM'e aç değil, 8–12 GB fazlasıyla yeter. GPU madenciliği modern kart başına kabaca 500 MH/s–1,5 GH/s, CPU'da ise iş parçacığı başına ~15 MH/s. Linux ARM64'te node var ama **resmî madenci binary'si yok**. Tam gereksinimler: [guide.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.tr.md#donanım-gereksinimleri).
+Hash hızı **GPU'dan ve madenci derlemesinden** gelir — disk boyutundan ya da CPU önbelleğinden değil. QPoW VRAM'e aç değil, 8–12 GB fazlasıyla yeter. Modern kart başına kabaca 500 MH/s–1,5 GH/s, CPU'da iş parçacığı başına ~15 MH/s bekle. Linux ARM64'te node var ama **resmî madenci binary'si yok**. Tam gereksinimler: [guide.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.tr.md#donanım-gereksinimleri).
 
 > Bazı resmî doküman ve araçlar birimi hâlâ `QUAN` diye etiketliyor. Aynı 21M arzlı yerel token; iki tickerı da alakasız coinlerle karıştırma.
 
 ---
 
-## 🔐 Güvenliğin Temeli
+## Güvenliğin Temeli
 
 - **24 kelimen kâğıttan çıkmaz.** Yol A için sadece `qz…` adresin, Yol B için sadece türetilen inner hash gerekir. İfadeyi kiralık makineye asla yazma.
 - Sırları dosyayla geçir (`--auth-token-file`), satır içinde asla — shell geçmişi kalıcıdır.
@@ -94,7 +94,7 @@ Hash hızı **GPU'dan ve madenci derlemesinden** gelir — disk boyutundan ya da
 
 ---
 
-## 🔗 Bağlantılar
+## Bağlantılar
 
 **Resmî** — [quantus.com](https://quantus.com/) · [dokümanlar](https://docs.quantus.com/) · [QPoW derinlemesine](https://docs.quantus.com/deep-dives/qpow) · [madenci protokolü](https://docs.quantus.com/deep-dives/miner-protocol/) · [kurulum betiği](https://docs.quantus.com/scripts/quantus-mining.sh)
 

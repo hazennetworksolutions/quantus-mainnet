@@ -3,7 +3,7 @@
 # ⚛️ Quantus Mainnet GPU Mining & Full Node Guide
 
 **Mine QTC on Quantus mainnet — join a pool, or run your own node with an external GPU miner**
-*Two complete routes, one shared setup. Wallet, CUDA miner, systemd service, node sync, monitoring and troubleshooting.*
+*Two complete routes, one shared setup: wallet, CUDA miner, systemd service, node sync, monitoring, troubleshooting.*
 
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%2B%20%7C%2026.04%20LTS-E95420?style=flat-square&logo=ubuntu&logoColor=white)](https://ubuntu.com)
 [![Quantus](https://img.shields.io/badge/Quantus-Mainnet-6C4DF6?style=flat-square)](https://quantus.com)
@@ -42,23 +42,23 @@
 **Then one route, not both**
 
 - [Part A — Pool Mining (Quanpool PPLNS)](#part-a--pool-mining-quanpool-pplns)
-  - [Step A1 — Install the Pool Miner](#step-a1--install-the-pool-miner)
-  - [Step A2 — Benchmark the Card](#step-a2--benchmark-the-card)
-  - [Step A3 — Get Your Token and TLS Pin](#step-a3--get-your-token-and-tls-pin)
-  - [Step A4 — First Manual Run](#step-a4--first-manual-run)
-  - [Step A5 — Create the systemd Service](#step-a5--create-the-systemd-service)
-  - [Step A6 — Verify on the Pool](#step-a6--verify-on-the-pool)
+  - [A1 — Install the Pool Miner](#a1--install-the-pool-miner)
+  - [A2 — Benchmark the Card](#a2--benchmark-the-card)
+  - [A3 — Token and TLS Pin](#a3--token-and-tls-pin)
+  - [A4 — First Manual Run](#a4--first-manual-run)
+  - [A5 — systemd Service](#a5--systemd-service)
+  - [A6 — Verify on the Pool](#a6--verify-on-the-pool)
   - [Part A Finish Line](#part-a-finish-line)
-- [Part B — Your Own Node (Official Path)](#part-b--your-own-node-official-path)
-  - [Step B1 — Automated Setup Script](#step-b1--automated-setup-script)
-  - [Step B2 — Manual Install: Binaries](#step-b2--manual-install-binaries)
-  - [Step B3 — Node Identity and Wormhole Inner Hash](#step-b3--node-identity-and-wormhole-inner-hash)
-  - [Step B4 — Start the Node](#step-b4--start-the-node)
-  - [Step B5 — Start the External Miner](#step-b5--start-the-external-miner)
-  - [Step B6 — Updating a Node/Miner Pair](#step-b6--updating-a-nodeminer-pair)
+- [Part B — Your Own Node](#part-b--your-own-node)
+  - [B1 — Automated Setup Script](#b1--automated-setup-script)
+  - [B2 — Manual Install: Binaries](#b2--manual-install-binaries)
+  - [B3 — Node Identity and Wormhole Inner Hash](#b3--node-identity-and-wormhole-inner-hash)
+  - [B4 — Start the Node](#b4--start-the-node)
+  - [B5 — Start the External Miner](#b5--start-the-external-miner)
+  - [B6 — Updating a Node/Miner Pair](#b6--updating-a-nodeminer-pair)
   - [Part B Finish Line](#part-b-finish-line)
 
-**Reference — for both routes**
+**Reference — both routes**
 
 - [Monitoring and Everyday Commands](#monitoring-and-everyday-commands)
 - [Performance Reference](#performance-reference)
@@ -72,18 +72,18 @@
 
 ## How Mining Works
 
-Quantus mining always involves **two jobs**, and understanding the split is what makes the rest of this guide obvious:
+Quantus mining always involves **two jobs**, and the split explains everything that follows:
 
 1. **The node** (`quantus-node`) connects to mainnet, keeps a full copy of the chain, assembles block candidates and hands out mining jobs. Started with `--miner-listen-port`, it also becomes a QUIC server on port `9833`.
 2. **The miner** does nothing but search for a winning nonce, on GPU or CPU. The miner is always the *client*: it dials the node, never the reverse.
 
-The algorithm is **QPoW** — double Poseidon2 hashing instead of SHA-256. A nonce wins when `Poseidon2(Poseidon2(block_hash ‖ nonce))` lands below the difficulty target. Poseidon2 was picked because it is cheap to verify inside a ZK circuit, not because SHA-256 is weak.
+The algorithm is **QPoW** — double Poseidon2 hashing instead of SHA-256. A nonce wins when `Poseidon2(Poseidon2(block_hash ‖ nonce))` lands below the difficulty target. Poseidon2 was chosen because it is cheap to verify inside a ZK circuit, not because SHA-256 is weak.
 
-The node's built-in CPU miner exists for testing — roughly **15 MH/s per thread**. Real throughput comes from an external GPU miner, in the **500 MH/s – 1.5 GH/s** range per modern card. Several miners may connect to one node; the first valid result wins.
+The node's built-in CPU miner exists for testing — roughly **15 MH/s per thread**. Real throughput comes from an external GPU miner, **500 MH/s – 1.5 GH/s** per modern card. Several miners may connect to one node; the first valid result wins.
 
-**The key question is who runs job 1.** If you run the node yourself, you own the whole pipeline. If you join a pool, the operator runs the node for you and your miner simply dials out to `host:9834` over UDP — which is why pool mining works behind CGNAT with no port forwarding, no static IP and no chain sync.
+**The key question is who runs job 1.** Run the node yourself and you own the whole pipeline. Join a pool and the operator runs it for you, while your miner dials out to `host:9834` over UDP — which is why pool mining works behind CGNAT with no port forwarding, no static IP and no chain sync.
 
-Either way, rewards never land on a regular address. The protocol pays a **wormhole address** derived from a 32-byte preimage called your *inner hash*. Derive it from the same 24 words as your wallet app and the rewards appear in the app, spendable, with no claim transaction.
+Either way, rewards never land on a regular address. The protocol pays a **wormhole address** derived from a 32-byte preimage called your *inner hash*. Derive it from the same 24 words as your wallet app and the rewards appear there, spendable, with no claim transaction.
 
 ### Chain facts worth knowing
 
@@ -103,17 +103,17 @@ Either way, rewards never land on a regular address. The protocol pays a **wormh
 
 ## The Two Routes — A or B
 
-This guide has two mutually exclusive halves. **Read this section before you install anything**, because the choice changes what you download, what you open on your firewall and how you get paid.
+Two mutually exclusive halves. **Read this before installing anything**: the choice changes what you download, what you open on your firewall and how you get paid.
 
 ### Part A — Pool Mining
 
-You run **only a miner**. It connects outbound to a pool operator's node, works on the jobs that node sends, and submits shares. The pool finds blocks and splits the reward across contributors by share count (PPLNS).
+You run **only a miner**. It connects outbound to a pool operator's node, works the jobs that node sends, and submits shares. The pool finds blocks and splits rewards by share count (PPLNS).
 
 - **You install:** one binary, one systemd service.
 - **You need:** a `qz…` address, a GPU, outbound UDP.
 - **You do not need:** a synced chain, disk space, open inbound ports, a public IP.
-- **You get paid:** small amounts, continuously, once you clear the payout threshold.
-- **Time to first hash:** roughly 15–30 minutes.
+- **You get paid:** small amounts, continuously, once past the payout threshold.
+- **Time to first hash:** 15–30 minutes.
 
 ### Part B — Your Own Node
 
@@ -121,8 +121,8 @@ You run **both jobs on your own hardware**: `quantus-node` syncing mainnet, plus
 
 - **You install:** two matched binaries, node identity, wormhole inner hash.
 - **You need:** 100 GB+ SSD, stable bandwidth, patience for the initial sync.
-- **You get paid:** the **whole** block reward when your node wins a block — and nothing in between.
-- **You also get:** zero pool fees, full custody, no trust in an operator, and a node that strengthens the network.
+- **You get paid:** the **whole** block reward when your node wins — and nothing in between.
+- **You also get:** zero fees, full custody, no trust in an operator, and a node that strengthens the network.
 - **Time to first hash:** a few hours, mostly sync time.
 
 ### Side by side
@@ -141,11 +141,11 @@ You run **both jobs on your own hardware**: `quantus-node` syncing mainnet, plus
 
 ### Which one should you pick?
 
-Pick **Part A** if any of these is true — and for most people at home, one of them is:
+Pick **Part A** if any of these is true — and at home, usually one is:
 
 - You have one or two consumer GPUs rather than a farm.
 - You are behind CGNAT, a mobile connection, or a router you do not control.
-- You want to see income within the week instead of waiting for luck.
+- You want income within the week instead of waiting for luck.
 - You do not want a process that has to stay synced.
 
 Pick **Part B** if:
@@ -155,7 +155,7 @@ Pick **Part B** if:
 - You refuse to route rewards through a third party.
 - You are on a server with a real IP, an SSD and no bandwidth cap.
 
-> **You do not have to decide forever.** The wallet, the address and the GPU work are identical in both routes, so switching later costs one evening — see [Switching Routes Later](#switching-routes-later).
+> **The decision is not permanent.** Wallet, address and GPU work are identical in both routes — see [Switching Routes Later](#switching-routes-later).
 
 ### How this guide is laid out
 
@@ -163,7 +163,7 @@ Pick **Part B** if:
   Step 1  Create a wallet          ─┐
   Step 2  Verify the GPU            ├─ everybody does these two
                                     │
-  ── Decision Point ────────────────┘
+  ── Decision Point ──────────────┘
          │
          ├── Part A  A1 → A6   ends at "Part A Finish Line"
          │
@@ -172,7 +172,7 @@ Pick **Part B** if:
   Reference sections apply to whichever route you finished
 ```
 
-**Do exactly one part.** Running both on the same machine means two miners fighting over one GPU; neither will perform.
+**Do exactly one part.** Both on one machine means two miners fighting over one GPU; neither performs.
 
 ---
 
@@ -187,11 +187,11 @@ Pick **Part B** if:
 | Network | 3 Mbps | 10+ Mbps |
 | GPU | none (CPU only, very slow) | NVIDIA RTX 20/30/40/50 series |
 
-- Hash rate is decided by the **GPU and the miner build** — not disk size, not CPU cache. A large-cache CPU does not accelerate Poseidon2.
+- Hash rate is decided by the **GPU and the miner build**, not disk size or CPU cache. A large-cache CPU does not accelerate Poseidon2.
 - QPoW is **not VRAM-hungry**. 8–12 GB is plenty; a 140 GB datacenter card is not "50× faster" and usually loses on cost per hash to a consumer 4090.
 - The node database is RocksDB and does random I/O. Any SSD works; an HDD stalls the sync.
 - **Linux ARM64 has no official miner binary** — mine from Linux x86_64 or macOS. AMD GPUs do not work with the CUDA pool miner.
-- **Part A needs none of the disk or bandwidth headroom above** — only the GPU and outbound UDP. Those rows exist for Part B.
+- **Part A needs none of the disk or bandwidth headroom above** — only the GPU and outbound UDP.
 
 ---
 
@@ -206,7 +206,7 @@ Pick **Part B** if:
 | `9615` | Node Prometheus metrics | B | Localhost |
 | `9900` | Miner metrics / `hive-stats` | A + B | Localhost |
 
-All official links (docs, releases, wallet, explorer, telemetry, pool) are collected in [README.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.md).
+All official links live in [README.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.md).
 
 ---
 
@@ -227,7 +227,7 @@ Both routes start here. Two steps, then you choose.
 
 ## Step 1 — Create a Wallet
 
-You need a `qz…` address before anything else. Both routes use the same wallet, and the same 24 words.
+You need a `qz…` address before anything else. Both routes use the same wallet and the same 24 words.
 
 1. Install the [Quantus Wallet](https://www.quantus.com/wallet/) (iOS / Android — links also on [linktr.ee/quantusnetwork](https://linktr.ee/quantusnetwork)).
 2. Create a wallet and write the **24-word phrase on paper**, offline.
@@ -240,7 +240,7 @@ CLI alternative:
 quantus wallet create --name mining
 ```
 
-> **CRITICAL:** the 24 words are the only recovery path for your rewards. Never type them into a chat window, a pool form or a rented server. Part A needs your **address**; Part B needs the **inner hash derived** from those words. Neither route ever needs the words themselves to leave your machine.
+> **CRITICAL:** the 24 words are the only recovery path for your rewards. Never type them into a chat window, a pool form or a rented server. Part A needs your **address**; Part B needs the **inner hash derived** from those words.
 
 **Done when:** you can read a `qz…` address off the screen and the 24 words are on paper.
 
@@ -250,7 +250,7 @@ quantus wallet create --name mining
 
 Confirm the proprietary NVIDIA driver is active before installing any miner. A miner on the wrong driver path silently runs 4–6× slow.
 
-> No Linux yet? Do **[ubuntu.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.md)** first — it hands back here. On a rented GPU the driver is already injected by the host: use **[vast.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.md)** instead of this guide.
+> No Linux yet? Do **[ubuntu.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.md)** first — it hands back here. On a rented GPU the driver is already injected by the host: use **[vast.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.md)**.
 
 ```bash
 sudo apt update && sudo apt upgrade -y
@@ -278,28 +278,26 @@ You should see the card name, the driver version and a `CUDA Version` column. Lo
 
 ## Decision Point — Pick Your Route
 
-Shared setup is finished. Everything below this line is **one route or the other**.
+Shared setup is finished. Everything below is **one route or the other**.
 
 | Choose | Go to | You will end up with |
 |---|---|---|
-| **Part A — Pool** | [Step A1](#step-a1--install-the-pool-miner) | One `quanpool-miner` service, hashing to a pool, balance accruing per share |
-| **Part B — Own node** | [Step B1](#step-b1--automated-setup-script) | A synced `quantus-node` plus a local `quantus-miner`, full block rewards to your wormhole address |
+| **Part A — Pool** | [A1](#a1--install-the-pool-miner) | One `quanpool-miner` service, hashing to a pool, balance accruing per share |
+| **Part B — Own node** | [B1](#b1--automated-setup-script) | A synced `quantus-node` plus a local `quantus-miner`, full block rewards |
 
-Still unsure? Do **Part A**. It is reversible in an hour, it proves your card and your address work, and it starts paying while you think about whether you want a node.
+Still unsure? Do **Part A**. It is reversible in an hour, it proves your card and address work, and it starts paying while you think.
 
 ---
 
 # Part A — Pool Mining (Quanpool PPLNS)
 
-> **Starts here.** Prerequisites: Step 1 (a `qz…` address) and Step 2 (a working GPU driver).
-> **Ends at:** [Part A Finish Line](#part-a-finish-line) — six steps below, after your worker shows up on the pool site.
-> **You will not touch:** `quantus-node`, chain sync, inbound firewall rules, or an inner hash. None of that belongs to this route.
+> **Prerequisites:** Step 1 (a `qz…` address) and Step 2 (a working GPU driver).
+> **Ends at:** [Part A Finish Line](#part-a-finish-line).
+> **You will not touch:** `quantus-node`, chain sync, inbound firewall rules, or an inner hash.
 
-The low-friction route: no node, no sync, no inbound ports, works behind CGNAT. One process connects outbound to the pool and you get paid per share.
+> Quanpool is a **community** pool, not official Quantus infrastructure. Host address, download link and TLS pin are published live on [quanpool.com](https://quanpool.com/) → **Start mining**. Copy them from there every time; the values below are placeholders on purpose.
 
-> Quanpool is a **community** pool, not official Quantus infrastructure. The host address, download link and TLS pin are published live on [quanpool.com](https://quanpool.com/) → **Start mining**. Copy them from there every time; the values below are placeholders on purpose.
-
-### Step A1 — Install the Pool Miner
+### A1 — Install the Pool Miner
 
 ```bash
 sudo mkdir -p /opt/quantus
@@ -315,9 +313,9 @@ If that version 404s, take the current Linux link from **Start mining** (6.1.0 a
 
 > The `gpu-list` subcommand was removed in 6.1+. Enumerate cards with `nvidia-smi -L`.
 
-### Step A2 — Benchmark the Card
+### A2 — Benchmark the Card
 
-A benchmark runs locally and never contacts the pool. Do it **before** any pool configuration — it answers the single most expensive question in this guide, namely whether you are on the CUDA code path at all.
+A benchmark runs locally and never contacts the pool. Do it **before** any pool configuration — it answers the most expensive question in this guide: whether you are on the CUDA code path at all.
 
 ```bash
 cd /opt/quantus
@@ -331,7 +329,7 @@ cd /opt/quantus
 
 Treat `--cpu-workers 0` as mandatory on a desktop. CPU mining adds ~15 MH/s per thread — negligible next to the card, while stealing the threads that feed it.
 
-### Step A3 — Get Your Token and TLS Pin
+### A3 — Token and TLS Pin
 
 On [quanpool.com](https://quanpool.com/) → **Start mining**, fill in:
 
@@ -342,7 +340,7 @@ On [quanpool.com](https://quanpool.com/) → **Start mining**, fill in:
 | Mode | **Pool (PPLNS)** |
 | System | **Linux** |
 
-There is no sign-up and no password: the address *is* the account. Copy the `--node-addr` (prefer the literal `IP:9834` over a hostname) and the 64-hex `--tls-cert-sha256` value. Write both to files instead of pasting them on a command line, so they never reach your shell history:
+There is no sign-up and no password: the address *is* the account. Copy the `--node-addr` (prefer the literal `IP:9834` over a hostname) and the 64-hex `--tls-cert-sha256` value into files, so they never reach your shell history:
 
 ```bash
 cd /opt/quantus
@@ -356,13 +354,7 @@ nano tls-cert-sha256
 chmod 600 auth-token tls-cert-sha256
 ```
 
-The token is just your address, a dot, and your worker name:
-
-```text
-qzYOURADDRESS.rig1
-```
-
-### Step A4 — First Manual Run
+### A4 — First Manual Run
 
 Run it in the foreground once so you can read the errors, before handing it to systemd.
 
@@ -387,9 +379,9 @@ Healthy signs within the first minute:
 
 > A burst of `SOLUTION LOST` / stale messages in the first seconds is normal while the miner catches up to the current job.
 
-Stop with `Ctrl+C` once it looks healthy. Do not leave it running in a terminal — the next step makes it survive reboots.
+Stop with `Ctrl+C` once it looks healthy — the next step makes it survive reboots.
 
-### Step A5 — Create the systemd Service
+### A5 — systemd Service
 
 ```bash
 sudo tee /etc/systemd/system/quanpool-miner.service >/dev/null <<EOF
@@ -429,7 +421,7 @@ gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-typ
 
 > A rented container usually has no working `systemd`. Use the image's process supervisor instead — see [vast.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.md).
 
-### Step A6 — Verify on the Pool
+### A6 — Verify on the Pool
 
 Locally first:
 
@@ -439,36 +431,34 @@ curl -s http://127.0.0.1:9900/hive-stats
 
 `hs` is usually **kH/s** — `430000` ≈ 430 MH/s. `ar` is `[accepted, rejected]` and rejected should stay at zero; `temp`, `fan` and `pool_rtt_ms` are also reported.
 
-Then open [quanpool.com](https://quanpool.com/), paste your `qz…` address into the lookup box and press **Look up**. Your worker appears within a few minutes, with its own hash rate, share count and a pending balance that grows.
+Then open [quanpool.com](https://quanpool.com/), paste your `qz…` address into the lookup box and press **Look up**. Your worker appears within a few minutes, with its own hash rate, share count and a growing pending balance.
 
 > Ports `9900`, `9833`, `9944` and `9615` must never be published to the internet. A router "virtual server" rule for them achieves nothing and creates real exposure.
 
 ### Part A Finish Line
 
-**Part A is complete when all four of these are true:**
+**Complete when all four are true:**
 
 1. `systemctl status quanpool-miner` reports `active (running)` and survives a reboot.
-2. `nvidia-smi` shows the card at 95–100% utilisation, at the hash rate from your Step A2 benchmark.
+2. `nvidia-smi` shows 95–100% utilisation at the hash rate from your A2 benchmark.
 3. `hive-stats` shows accepted shares climbing and rejected staying at zero.
 4. Your worker is visible on the pool lookup page and the pending balance is rising.
 
-**That is the end of the route.** There is nothing else to install: no node, no sync, no inner hash. From here go to [Monitoring and Everyday Commands](#monitoring-and-everyday-commands) for the daily handful of commands, [Running Multiple Machines](#running-multiple-machines) to add a second rig, or [Economics](#economics--what-to-expect) to understand what the numbers mean.
-
-**Skip Part B entirely** unless you later decide you want your own node — in which case read [Switching Routes Later](#switching-routes-later) first.
+Nothing else to install: no node, no sync, no inner hash. Continue to [Monitoring](#monitoring-and-everyday-commands), [Running Multiple Machines](#running-multiple-machines) or [Economics](#economics--what-to-expect). **Skip Part B** unless you later decide you want your own node — then read [Switching Routes Later](#switching-routes-later) first.
 
 ---
 
-# Part B — Your Own Node (Official Path)
+# Part B — Your Own Node
 
-> **Starts here.** Prerequisites: Step 1 (the 24 words — you derive the inner hash from them) and Step 2 (a working GPU driver). Plus a 100 GB+ SSD and bandwidth you are willing to leave running.
-> **Ends at:** [Part B Finish Line](#part-b-finish-line) — after your node reaches the chain tip and a local miner is feeding it.
-> **Two ways through:** Step B1 is the official script and does everything for you. Steps B2–B5 are the manual equivalent. **Do B1, or do B2–B5 — not both.** B6 applies either way.
+> **Prerequisites:** Step 1 (the 24 words — you derive the inner hash from them), Step 2 (a working GPU driver), a 100 GB+ SSD and bandwidth you can leave running.
+> **Ends at:** [Part B Finish Line](#part-b-finish-line).
+> **Two ways through:** B1 is the official script and does everything for you. B2–B5 are the manual equivalent. **Do B1, or do B2–B5 — not both.** B6 applies either way.
 
 No pool fees and full custody, at the cost of a full chain sync and a matched binary pair. Works on Linux, macOS and WSL2.
 
-### Step B1 — Automated Setup Script
+### B1 — Automated Setup Script
 
-The official script generates the wormhole inner hash and node identity, downloads a matched pair into `~/quantus-mining/bin/`, and writes `~/quantus-mining/mining.conf` with `CHAIN=mainnet`. If it works, you can skip to [Part B Finish Line](#part-b-finish-line) and wait for the sync.
+The official script generates the wormhole inner hash and node identity, downloads a matched pair into `~/quantus-mining/bin/`, and writes `~/quantus-mining/mining.conf` with `CHAIN=mainnet`.
 
 ```bash
 curl -fsSL https://docs.quantus.com/scripts/quantus-mining.sh -o quantus-mining.sh
@@ -501,9 +491,9 @@ Pin an explicit pair instead of letting two `latest` tags drift apart:
 
 `--force` refreshes binaries only: it keeps your `INNER_HASH` and wormhole address and does **not** generate a new keypair. The script reads the node's `miner-auth-token` and `miner-tls-cert-sha256` itself, so you never copy those by hand. Docker mode has been removed.
 
-> **If the script covered you, stop here** and jump to the [Part B Finish Line](#part-b-finish-line). Steps B2–B5 describe the same result built by hand — useful when you want control over paths, versions and service management, or when the script fails on your distro.
+> **If the script covered you, stop here** and jump to the [Part B Finish Line](#part-b-finish-line). B2–B5 build the same result by hand — useful when you want control over paths, versions and service management, or when the script fails on your distro.
 
-### Step B2 — Manual Install: Binaries
+### B2 — Manual Install: Binaries
 
 ```bash
 sudo apt update
@@ -519,7 +509,7 @@ wget https://github.com/Quantus-Network/quantus-miner/releases/download/v4.2.0/q
 chmod +x quantus-miner
 ```
 
-Check [Releases](https://github.com/Quantus-Network/chain/releases) for the current tags — the official guidance is **node v1.0.1 or newer**, and the two repositories version independently.
+Check [Releases](https://github.com/Quantus-Network/chain/releases) for current tags — official guidance is **node v1.0.1 or newer**, and the two repositories version independently.
 
 Confirm the pair speaks the authenticated protocol **before** going further — both commands must print a match:
 
@@ -537,7 +527,7 @@ Confirm the pair speaks the authenticated protocol **before** going further — 
 
 On macOS, clear the Gatekeeper flag first: `xattr -d com.apple.quarantine quantus-node`.
 
-### Step B3 — Node Identity and Wormhole Inner Hash
+### B3 — Node Identity and Wormhole Inner Hash
 
 ```bash
 ./quantus-node key generate-node-key --file node_key.p2p
@@ -554,7 +544,7 @@ On macOS, clear the Gatekeeper flag first: `xattr -d com.apple.quarantine quantu
 
 Using the same 24 words as your wallet app is the recommended path — rewards then show up in the app automatically. To mine to a brand-new wallet instead, run `./quantus-node key quantus --scheme wormhole` and back up the phrase it generates. Reward routing to a wormhole address is **not optional**; it is built into the protocol, which is also why your mining identity is not linked on-chain to your payout address.
 
-### Step B4 — Start the Node
+### B4 — Start the Node
 
 ```bash
 screen -S quantus-node
@@ -589,7 +579,7 @@ On first start with `--miner-listen-port`, the node writes the miner auth materi
 
 Also wait for the log line confirming the miner server is listening. If miner-server startup fails the node exits — there is no fallback to local mining.
 
-### Step B5 — Start the External Miner
+### B5 — Start the External Miner
 
 In a second terminal:
 
@@ -608,11 +598,11 @@ CHAIN_DIR="$HOME/.local/share/quantus-node/chains/mainnet"
 
 Variants: add `--cuda-gpu` on an NVIDIA card where Vulkan is unavailable; use `--cpu-workers 4 --gpu-devices 0` on a machine without a usable GPU; add `--gpu-throttle-ms 50` (or `5` if you also use the desktop) to cap heat and power draw.
 
-> Always use `--auth-token-file` / `--tls-cert-sha256-file` rather than the inline forms, so secrets stay out of your shell history. A wrong token or pin is a **permanent** error: the miner stops instead of reconnect-looping. Re-read the files.
+> Always use `--auth-token-file` / `--tls-cert-sha256-file` rather than the inline forms. A wrong token or pin is a **permanent** error: the miner stops instead of reconnect-looping. Re-read the files.
 >
 > On macOS quote `CHAIN_DIR` — the path contains a space.
 
-### Step B6 — Updating a Node/Miner Pair
+### B6 — Updating a Node/Miner Pair
 
 Applies to both the scripted and the manual install:
 
@@ -623,15 +613,15 @@ Applies to both the scripted and the manual install:
 
 ### Part B Finish Line
 
-**Part B is complete when all five of these are true:**
+**Complete when all five are true:**
 
 1. The node log reads `Idle` at the current chain height, with a stable peer count.
 2. Your `--name` is visible on [telemetry.quantus.cat](https://telemetry.quantus.cat/).
 3. The node logged that the miner server is listening on `9833`.
-4. The miner is connected, `nvidia-smi` shows 95–100% utilisation, and the log shows `Broadcasting job` on the node side.
-5. `ufw status` allows `22/tcp` and `30333/tcp` and **nothing else** — `9833`, `9944` and `9615` stay closed.
+4. The miner is connected, `nvidia-smi` shows 95–100% utilisation, and the node log shows `Broadcasting job`.
+5. `ufw status` allows `22/tcp` and `30333/tcp` and **nothing else**.
 
-**That is the end of the route.** Rewards now arrive as whole blocks, irregularly, at the wormhole address from Step B3 — check it in the wallet app or the explorer. Continue to [Monitoring and Everyday Commands](#monitoring-and-everyday-commands), then read [Economics](#economics--what-to-expect) so the silence between blocks does not worry you.
+Rewards now arrive as whole blocks, irregularly, at the wormhole address from B3 — check it in the wallet app or the explorer. Continue to [Monitoring](#monitoring-and-everyday-commands), then [Economics](#economics--what-to-expect) so the silence between blocks does not worry you.
 
 ---
 
@@ -655,7 +645,7 @@ nvidia-smi --query-gpu=index,temperature.gpu,utilization.gpu,power.draw,fan.spee
 nc -zvu <POOL_HOST> 9834
 ```
 
-The pool's lookup page shows workers, pending balance and payouts. To update the binary: stop the service, download the new file, `chmod +x`, start again. If the current version works, an available update is not urgent.
+The pool's lookup page shows workers, pending balance and payouts. To update the binary: stop the service, download the new file, `chmod +x`, start again.
 
 **Part B — own node**
 
@@ -718,7 +708,7 @@ sudo ufw status verbose
 
 Do **not** open `9833`, `9944` or `9615`. For a remote miner, join it to the node over WireGuard or Tailscale and keep the miner port private.
 
-Behind CGNAT (most mobile and many fibre home connections) inbound `30333` never arrives — the rule is harmless but does nothing, and the node still syncs through outbound connections. Port forwarding on the router cannot fix CGNAT; only a public IP or a VPN endpoint can. This is precisely why Part A is the easier home route.
+Behind CGNAT (most mobile and many fibre home connections) inbound `30333` never arrives — the rule is harmless but does nothing, and the node still syncs through outbound connections. Port forwarding cannot fix CGNAT; only a public IP or a VPN endpoint can. This is precisely why Part A is the easier home route.
 
 ---
 
@@ -746,7 +736,7 @@ Several miners can pay into the **same** `qz…` address; PPLNS shares add up.
 | Still pointing at `127.0.0.1:9833` | That is the Part B address; pool mining uses the pool host on `9834` |
 | Service `running` but GPU at 0% | Read the log: token, pin or `--node-addr` is wrong |
 | Home worker vanished after adding a rig | Duplicate worker name. Rename one and restart both |
-| Mining stops when the machine goes idle | Suspend is still enabled — re-apply the `gsettings` commands in Step A5 |
+| Mining stops when the machine goes idle | Suspend is still enabled — re-apply the `gsettings` commands in A5 |
 
 ### Part B — own node route
 
@@ -774,17 +764,17 @@ Add-MpPreference -ExclusionPath "$env:USERPROFILE\.quantus"
 
 ## Economics — What to Expect
 
-**Emission.** Block rewards follow `(MaxSupply − CurrentSupply) / EmissionDivisor` — smooth exponential decay of a fixed 21,000,000 supply, with no halving cliffs. Miners receive **50% of total supply** over time and roughly 99% of all supply is emitted within about 40 years. A dev tax on block rewards allocates 15% to the company, vesting over years.
+**Emission.** Block rewards follow `(MaxSupply − CurrentSupply) / EmissionDivisor` — smooth exponential decay of a fixed 21,000,000 supply, with no halving cliffs. Miners receive **50% of total supply** over time and roughly 99% of all supply is emitted within about 40 years. A dev tax allocates 15% of block rewards to the company, vesting over years.
 
 **On-chain fees.** Standard transfers pay a fixed fee that goes to the miner. High-security reversible transfers pay a volume-based fee that is burned, and ZK-aggregated transactions pay a smaller volume fee split between the miner and a burn. Mining income therefore comes overwhelmingly from emission, not from fees.
 
-**Part A — how PPLNS pays.** You are paid **per share, not per block**. No block is ever "yours"; your balance accrues continuously and that is the whole point — it removes variance. The pool charges a flat fee and pays out above a single threshold; both are published on the pool site, and both have changed over time, so read them there rather than trusting a number in any guide, including this one. Solo mode inside a pool carries the same fee but pays like a lottery.
+**Part A — how PPLNS pays.** You are paid **per share, not per block**. No block is ever "yours"; your balance accrues continuously and that is the whole point — it removes variance. The pool charges a flat fee and pays out above a single threshold; both are published on the pool site and both have changed over time, so read them there rather than trusting a number in any guide, including this one. Solo mode inside a pool carries the same fee but pays like a lottery.
 
-**Part B — how solo pays.** Zero fees, full custody, and a reward of one whole block whenever you win. With a single consumer card against a network measured in TH/s, that can mean long silences. Nothing is wrong; variance is simply the price of not sharing.
+**Part B — how solo pays.** Zero fees, full custody, and one whole block reward whenever you win. With a single consumer card against a network measured in TH/s, that can mean long silences. Nothing is wrong; variance is the price of not sharing.
 
-**What moves your income.** Difficulty re-adjusts on every finalized block, so a rising network hash rate lowers your daily QTC even if your rig never changes. Your own numbers are worth more than any table: measure with `benchmark`, then compare against the pool's live network hash rate.
+**What moves your income.** Difficulty re-adjusts on every finalized block, so a rising network hash rate lowers your daily QTC even if your rig never changes. Measure with `benchmark`, then compare against the pool's live network hash rate.
 
-> QTC market data is thin, and the unit is labelled `QUAN` in parts of the official docs and tooling — easy to confuse with unrelated tickers. Treat any fiat projection as speculative.
+> QTC market data is thin, and the unit is labelled `QUAN` in parts of the official docs and tooling. Treat any fiat projection as speculative.
 
 ---
 
@@ -798,13 +788,13 @@ The two routes share the wallet, the address and the GPU work, so moving between
 sudo systemctl disable --now quanpool-miner
 ```
 
-Then start at [Step B1](#step-b1--automated-setup-script). Derive the inner hash from the **same** 24 words and rewards keep landing in the same wallet app. Leave any pending pool balance alone — it pays out on the normal schedule.
+Then start at [B1](#b1--automated-setup-script). Derive the inner hash from the **same** 24 words and rewards keep landing in the same wallet app. Leave any pending pool balance alone — it pays out on the normal schedule.
 
 **B → A (own node to pool)**
 
-Stop the miner, then the node. Keep `chains/mainnet/` if you might come back; it saves the resync. Then start at [Step A1](#step-a1--install-the-pool-miner) using the same `qz…` address.
+Stop the miner, then the node. Keep `chains/mainnet/` if you might come back; it saves the resync. Then start at [A1](#a1--install-the-pool-miner) using the same `qz…` address.
 
-**Running both at once is not a strategy.** Two miners on one GPU halve each other. If you have two cards, give each route its own card with `--gpu-devices` and separate services — otherwise pick one.
+**Running both at once is not a strategy.** Two miners on one GPU halve each other. With two cards, give each route its own card via `--gpu-devices` and separate services — otherwise pick one.
 
 ---
 
@@ -820,5 +810,5 @@ Stop the miner, then the node. Keep `chains/mainnet/` if you might come back; it
 
 ## About the Author
 
-This guide was prepared by **HazenNetworkSolutions**.
+Prepared by **HazenNetworkSolutions**.
 🌐 [hazennetworksolutions.com](https://hazennetworksolutions.com)

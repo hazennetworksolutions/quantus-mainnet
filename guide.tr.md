@@ -2,13 +2,13 @@
 
 # ⚛️ Quantus Mainnet GPU Madencilik & Tam Node Rehberi
 
-**Quantus mainnet'te QTC kaz — ya bir havuza katıl, ya kendi node'unu harici GPU madencisiyle çalıştır**
-*İki eksiksiz yol, tek ortak kurulum. Cüzdan, CUDA madencisi, systemd servisi, node senkronu, takip ve sorun giderme.*
+**Quantus mainnet'te QTC kaz — havuza katıl ya da kendi node'unu harici GPU madencisiyle çalıştır**
+*İki eksiksiz yol, tek ortak kurulum: cüzdan, CUDA madencisi, systemd servisi, node senkronu, izleme, sorun giderme.*
 
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%2B%20%7C%2026.04%20LTS-E95420?style=flat-square&logo=ubuntu&logoColor=white)](https://ubuntu.com)
 [![Quantus](https://img.shields.io/badge/Quantus-Mainnet-6C4DF6?style=flat-square)](https://quantus.com)
 [![Node](https://img.shields.io/badge/Node-v1.0.1%2B-brightgreen?style=flat-square)](https://github.com/Quantus-Network/chain/releases)
-[![Madenci](https://img.shields.io/badge/Madenci%20Protokolü-quantus--miner%2F2-blue?style=flat-square)](https://docs.quantus.com/deep-dives/miner-protocol/)
+[![Miner](https://img.shields.io/badge/Madenci%20Protokolü-quantus--miner%2F2-blue?style=flat-square)](https://docs.quantus.com/deep-dives/miner-protocol/)
 [![GPU](https://img.shields.io/badge/GPU-NVIDIA%20CUDA-76B900?style=flat-square&logo=nvidia&logoColor=white)](https://docs.quantus.com/deep-dives/qpow)
 
 [hazennetworksolutions.com](https://hazennetworksolutions.com)
@@ -17,7 +17,7 @@
 
 ---
 
-> **Hazırlayan:** HazenNetworkSolutions
+> **Yazar:** HazenNetworkSolutions
 > **Ağ:** Quantus Mainnet (`--chain mainnet`)
 > **Sürümler:** `quantus-node` v1.0.1+ · `quantus-miner` v4.2.x · havuz madencisi 6.2.0
 > **Son Güncelleme:** Eylül 2026
@@ -26,187 +26,187 @@
 
 ## İçindekiler
 
-**Önce bunları oku**
+**Önce oku**
 
-- [Madencilik Nasıl Çalışır](#madencilik-nasıl-çalışır)
-- [Hangi Yol — A mı, B mi](#hangi-yol--a-mı-b-mi)
+- [Madencilik Nasıl İşliyor](#madencilik-nasıl-işliyor)
+- [Hangi Yol — A mı B mi](#hangi-yol--a-mı-b-mi)
 - [Donanım Gereksinimleri](#donanım-gereksinimleri)
 - [Portlar ve Uç Noktalar](#portlar-ve-uç-noktalar)
 
-**Ortak kurulum — herkes bunu yapar**
+**Ortak kurulum — herkes yapıyor**
 
 - [Adım 1 — Cüzdan Oluştur](#adım-1--cüzdan-oluştur)
 - [Adım 2 — GPU'yu Doğrula (Linux)](#adım-2--gpuyu-doğrula-linux)
 - [Karar Noktası — Yolunu Seç](#karar-noktası--yolunu-seç)
 
-**Sonra tek bir yol, ikisi birden değil**
+**Sonrasında tek yol, ikisi birden değil**
 
-- [Yol A — Havuz Madenciliği (Quanpool PPLNS)](#yol-a--havuz-madenciliği-quanpool-pplns)
-  - [Adım A1 — Havuz Madencisini Kur](#adım-a1--havuz-madencisini-kur)
-  - [Adım A2 — Kartı Benchmark Et](#adım-a2--kartı-benchmark-et)
-  - [Adım A3 — Token ve TLS Pinini Al](#adım-a3--token-ve-tls-pinini-al)
-  - [Adım A4 — Manuel Çalıştırma](#adım-a4--manuel-çalıştırma)
-  - [Adım A5 — systemd Servisi Oluştur](#adım-a5--systemd-servisi-oluştur)
-  - [Adım A6 — Havuzda Doğrula](#adım-a6--havuzda-doğrula)
-  - [Yol A Bitiş Çizgisi](#yol-a-bitiş-çizgisi)
-- [Yol B — Kendi Node'un (Resmî Yol)](#yol-b--kendi-nodeun-resmî-yol)
-  - [Adım B1 — Otomatik Kurulum Betiği](#adım-b1--otomatik-kurulum-betiği)
-  - [Adım B2 — Manuel Kurulum: Binary'ler](#adım-b2--manuel-kurulum-binaryler)
-  - [Adım B3 — Node Kimliği ve Wormhole Inner Hash](#adım-b3--node-kimliği-ve-wormhole-inner-hash)
-  - [Adım B4 — Node'u Başlat](#adım-b4--nodeu-başlat)
-  - [Adım B5 — Harici Madenciyi Başlat](#adım-b5--harici-madenciyi-başlat)
-  - [Adım B6 — Node/Madenci Çiftini Güncelleme](#adım-b6--nodemadenci-çiftini-güncelleme)
-  - [Yol B Bitiş Çizgisi](#yol-b-bitiş-çizgisi)
+- [Bölüm A — Havuz Madenciliği (Quanpool PPLNS)](#bölüm-a--havuz-madenciliği-quanpool-pplns)
+  - [A1 — Havuz Madencisini Kur](#a1--havuz-madencisini-kur)
+  - [A2 — Kartı Benchmark Et](#a2--kartı-benchmark-et)
+  - [A3 — Token ve TLS Pini](#a3--token-ve-tls-pini)
+  - [A4 — İlk Manuel Çalıştırma](#a4--ilk-manuel-çalıştırma)
+  - [A5 — systemd Servisi](#a5--systemd-servisi)
+  - [A6 — Havuzda Doğrula](#a6--havuzda-doğrula)
+  - [Bölüm A Bitiş Çizgisi](#bölüm-a-bitiş-çizgisi)
+- [Bölüm B — Kendi Node'un](#bölüm-b--kendi-nodeun)
+  - [B1 — Otomatik Kurulum Betigi](#b1--otomatik-kurulum-betigi)
+  - [B2 — Manuel Kurulum: Binary'ler](#b2--manuel-kurulum-binaryler)
+  - [B3 — Node Kimliği ve Wormhole Inner Hash](#b3--node-kimliği-ve-wormhole-inner-hash)
+  - [B4 — Node'u Başlat](#b4--nodeu-başlat)
+  - [B5 — Harici Madenciyi Başlat](#b5--harici-madenciyi-başlat)
+  - [B6 — Node/Madenci Çiftini Güncelleme](#b6--nodemadenci-çiftini-güncelleme)
+  - [Bölüm B Bitiş Çizgisi](#bölüm-b-bitiş-çizgisi)
 
-**Referans — iki yol için de geçerli**
+**Referans — iki yol için de**
 
-- [Günlük Komutlar ve Takip](#günlük-komutlar-ve-takip)
+- [İzleme ve Günlük Komutlar](#izleme-ve-günlük-komutlar)
 - [Performans Referansı](#performans-referansı)
 - [Güvenlik Duvarı](#güvenlik-duvarı)
-- [Birden Fazla Makine](#birden-fazla-makine)
+- [Çoklu Makine Çalıştırmak](#çoklu-makine-çalıştırmak)
 - [Sorun Giderme](#sorun-giderme)
 - [Ekonomi — Ne Beklemeli](#ekonomi--ne-beklemeli)
-- [Sonradan Yol Değiştirme](#sonradan-yol-değiştirme)
+- [Sonradan Yol Değiştirmek](#sonradan-yol-değiştirmek)
 
 ---
 
-## Madencilik Nasıl Çalışır
+## Madencilik Nasıl İşliyor
 
-Quantus madenciliğinde her zaman **iki iş** vardır ve bu ayrımı anladığın an rehberin kalanı kendiliğinden yerine oturur:
+Quantus madenciliği her zaman **iki iş** demektir ve bu ayrım geri kalan her şeyi açıklıyor:
 
-1. **Node** (`quantus-node`) mainnet'e bağlanır, zincirin tam kopyasını tutar, blok adaylarını hazırlar ve madencilik işlerini dağıtır. `--miner-listen-port` ile başlatıldığında ayrıca `9833` portunda bir QUIC sunucusu olur.
-2. **Madenci** tek bir şey yapar: kazanan nonce'u arar, GPU ya da CPU üzerinde. Madenci her zaman *istemcidir*; node'a o bağlanır, tersi olmaz.
+1. **Node** (`quantus-node`) mainnet'e bağlanır, zincirin tam kopyasını tutar, blok adaylarını hazırlar ve madencilik işlerini dağıtır. `--miner-listen-port` ile başlatıldığında aynı zamanda `9833` portunda bir QUIC sunucusu olur.
+2. **Madenci** başka hiçbir şey yapmaz; GPU ya da CPU üzerinde kazanan nonce'u arar. Madenci her zaman *istemcidir*: node'u arar, tersi olmaz.
 
-Algoritma **QPoW** — SHA-256 yerine çift Poseidon2 hash'i. Bir nonce, `Poseidon2(Poseidon2(blok_hash ‖ nonce))` sonucu zorluk hedefinin altına düştüğünde kazanır. Poseidon2'nin seçilme nedeni ZK devresi içinde doğrulanmasının ucuz olması; SHA-256'nın zayıf olması değil.
+Algoritma **QPoW** — SHA-256 yerine çift Poseidon2 hash'i. Bir nonce, `Poseidon2(Poseidon2(block_hash ‖ nonce))` zorluk hedefinin altına düştüğünde kazanır. Poseidon2'nin seçilme sebebi ZK devresi içinde ucuz doğrulanması, SHA-256'nın zayıf olması değil.
 
-Node'un dahili CPU madencisi test amaçlıdır — çekirdek başına kabaca **15 MH/s**. Gerçek hız harici GPU madencisinden gelir: modern bir kartta **500 MH/s – 1,5 GH/s** aralığı. Aynı node'a birden fazla madenci bağlanabilir; geçerli sonucu ilk bulan kazanır.
+Node'un gömülü CPU madencisi test içindir — iş parçacığı başına kabaca **15 MH/s**. Gerçek hız harici GPU madencisinden gelir: modern kart başına **500 MH/s – 1,5 GH/s**. Tek node'a birden fazla madenci bağlanabilir; ilk geçerli sonuç kazanır.
 
-**Asıl soru şu: 1. işi kim çalıştırıyor?** Node'u kendin çalıştırırsan tüm hattın sahibi olursun. Havuza katılırsan node'u operatör çalıştırır, senin madencin sadece UDP üzerinden `host:9834` adresine dışa doğru bağlanır — havuz madenciliğinin CGNAT arkasında, port yönlendirmesi olmadan, sabit IP olmadan ve zincir senkronu olmadan çalışmasının sebebi tam olarak budur.
+**Asıl soru, birinci işi kimin yaptığı.** Node'u kendin çalıştırırsan hattın tamamı senin olur. Havuza katılırsan node'u operatör işletir, senin madencin ise UDP üzerinden `host:9834`'e dışa doğru bağlanır — bu yüzden havuz madenciliği CGNAT arkasında, port yönlendirmesiz, statik IP'siz ve zincir senkronu olmadan çalışır.
 
-Her iki durumda da ödüller normal bir adrese düşmez. Protokol, *inner hash* denilen 32 baytlık bir ön görüntüden türetilen bir **wormhole adresine** ödeme yapar. Bunu cüzdan uygulamandaki 24 kelimenin aynısından türetirsen ödüller doğrudan uygulamada, harcanabilir şekilde görünür; talep işlemi yoktur.
+İki durumda da ödüller normal bir adrese düşmez. Protokol, *inner hash* denen 32 bytelık bir öngörüntüden türeyen bir **wormhole adresine** ödeme yapar. Bunu cüzdan uygulamandaki aynı 24 kelimeden türetirsen ödüller orada, harcanabilir halde, talep işlemi gerekmeden görünür.
 
 ### Bilmeye değer zincir bilgileri
 
 | Parametre | Değer |
 |---|---|
 | Algoritma | QPoW — çift Poseidon2 |
-| Adres biçimi | SS58 öneki 189 — adresler `qz…` ile başlar |
+| Adres formatı | SS58 öneki 189 — adresler `qz…` ile başlar |
 | Maksimum arz | 21.000.000, 12 ondalık |
-| Zorluk ayarı | Her sonlanan blokta, blok başına sınırlı — 2016 bloklu dönem yok |
-| Çatal seçimi | En uzun değil, kümülatif işi en ağır zincir |
-| Sonlanma | Uçtan 179 blok geride (maks. reorg derinliği 180) |
+| Zorluk ayarı | Her finalize blokta, blok başına sınırlı — 2016 bloklu dönem yok |
+| Çatal seçimi | En uzun değil, kümülatif işe göre en ağır zincir |
+| Finalizasyon | Tepenin 179 blok gerisi (maks. reorg derinliği 180) |
 | Blok ödülü | `(MaxSupply − CurrentSupply) / EmissionDivisor` — yumuşak azalma, halving yok |
 
-> ⚠️ Her zaman `--chain mainnet` kullan. `planck` kapanmış test ağıdır: ayrı zincir, ayrı veritabanı, bakiye taşıması yok. `chains/planck/` klasörünü asla `chains/mainnet/` içine kopyalama ve mainnet'te asla `--force-authoring` verme — o parametre sıfırdan yeni bir ağ başlatmak içindir.
+> ⚠️ Her zaman `--chain mainnet` ver. `planck` kapanan testnet: ayrı zincir, ayrı veritabanı, bakiye taşınması yok. `chains/planck/` dizinini asla `chains/mainnet/` içine kopyalama ve mainnet'te asla `--force-authoring` kullanma — o parametre sıfırdan ağ başlatmak için.
 
 ---
 
-## Hangi Yol — A mı, B mi
+## Hangi Yol — A mı B mi
 
-Bu rehberin birbirini dışlayan iki yarısı var. **Hiçbir şey kurmadan önce burayı oku**, çünkü bu seçim neyi indireceğini, güvenlik duvarında neyi açacağını ve nasıl ödeme alacağını baştan belirliyor.
+İki ayrı yarı, birbirini dışlar. **Hiçbir şey kurmadan önce bunu oku**: karar neyi indireceğini, güvenlik duvarında neyi açacağını ve nasıl ödeme alacağını değiştiriyor.
 
-### Yol A — Havuz Madenciliği
+### Bölüm A — Havuz Madenciliği
 
-Sadece **madenciyi** çalıştırırsın. Madenci, bir havuz operatörünün node'una dışa doğru bağlanır, o node'un gönderdiği işleri çalışır ve pay (share) gönderir. Blokları havuz bulur, ödülü katkı paylarına göre böler (PPLNS).
+Sadece **madenci** çalıştırırsın. Madenci dışa doğru bir havuz node'una bağlanır, o node'un gönderdiği işleri yapar ve pay (share) gönderir. Blokları havuz bulur, ödülü pay sayısına göre bölüştürür (PPLNS).
 
-- **Kuracağın:** tek bir binary, tek bir systemd servisi.
+- **Kurduğun:** tek binary, tek systemd servisi.
 - **Gereken:** bir `qz…` adresi, bir GPU, dışa açık UDP.
-- **Gerekmeyen:** senkron zincir, disk alanı, içe açık port, genel IP.
-- **Ödeme şekli:** küçük miktarlar, sürekli akan; ödeme eşiğini geçtikten sonra.
-- **İlk hash'e kadar:** kabaca 15–30 dakika.
+- **Gerekmeyen:** senkron zincir, disk alanı, açık gelen port, genel IP.
+- **Ödeme:** küçük miktarlar, sürekli, ödeme eşiğini geçtikten sonra.
+- **İlk hash'e süre:** 15–30 dakika.
 
-### Yol B — Kendi Node'un
+### Bölüm B — Kendi Node'un
 
-Her iki işi de **kendi donanımında** çalıştırırsın: mainnet'i senkronlayan `quantus-node` ve ona `127.0.0.1:9833` üzerinden bağlanan `quantus-miner`.
+**İki işi de kendi donanımında** yaparsın: mainnet'i senkronlayan `quantus-node` ve ona `127.0.0.1:9833` üzerinden bağlanan `quantus-miner`.
 
-- **Kuracağın:** eşleşen iki binary, node kimliği, wormhole inner hash.
-- **Gereken:** 100 GB+ SSD, istikrarlı bant genişliği, ilk senkron için sabır.
-- **Ödeme şekli:** node'un blok bulduğunda **ödülün tamamı** — arada ise hiç.
-- **Ayrıca:** sıfır havuz komisyonu, tam kendi kontrolün, operatöre güven gerekmez ve ağı güçlendiren bir node.
-- **İlk hash'e kadar:** birkaç saat, çoğu senkron süresi.
+- **Kurduğun:** eşleşmiş iki binary, node kimliği, wormhole inner hash.
+- **Gereken:** 100 GB+ SSD, stabil bant genişliği, ilk senkron için sabır.
+- **Ödeme:** node'un kazandığı blokta ödülün **tamamı** — arasında hiçbir şey.
+- **Ayrıca:** sıfır komisyon, tam kontrol, operatöre güven gerektirmez ve ağı güçlendiren bir node.
+- **İlk hash'e süre:** birkaç saat, çoğu senkron.
 
 ### Yan yana
 
-| | **Yol A — Havuz** | **Yol B — Kendi node'un** |
+| | **Bölüm A — Havuz** | **Bölüm B — Kendi node** |
 |---|---|---|
 | Çalışan süreç | 1 (madenci) | 2 (node + madenci) |
-| Zincir senkronu | yok | tam senkron şart |
-| Disk | önemsiz | 100 GB+ SSD, HDD olmaz |
-| CGNAT arkasında | evet, tasarımı gereği | evet, dışa bağlantı yeterli |
-| İçe açık port | yok | `30333/TCP` opsiyonel |
-| Gelir biçimi | düzenli sızıntı | seyrek büyük parçalar |
-| Komisyon | havuz komisyonu, havuz sitesinde yayınlanır | yok |
-| Güven varsayımı | operatörün dürüst ödemesi | yok |
-| Kime uygun | evde bir iki tüketici kartı | özel bir rig, ya da zaten isteyeceğin bir node |
+| Zincir senkronu | yok | tam senkron zorunlu |
+| Disk | ihmal edilebilir | 100 GB+ SSD, HDD olmaz |
+| CGNAT arkasında | evet, tasarım gereği | evet, dışa bağlantı yeter |
+| Gelen port | yok | `30333/TCP` opsiyonel |
+| Gelirin şekli | düzenli akış | seyrek toplu, yüksek varyans |
+| Komisyon | havuz komisyonu, havuz sitesinde yayınlı | yok |
+| Güven varsayımı | operatör dürüst öder | yok |
+| Kime uygun | evde bir iki tüketici kartı | ayırılmış rig ya da zaten istediğin bir node |
 
 ### Hangisini seçmelisin?
 
-Şunlardan biri doğruysa **Yol A**'yı seç — evdeki çoğu kişi için en az biri doğrudur:
+Şu maddelerden biri doğruysa **Bölüm A** — evde genelde biri doğrudur:
 
-- Çiftlik değil, bir ya da iki tüketici GPU'n var.
-- CGNAT, mobil bağlantı ya da yönetmediğin bir modem arkasındasın.
-- Şansın dönmesini beklemek yerine hafta içinde gelir görmek istiyorsun.
+- Çiftlik değil, bir iki tüketici GPU'n var.
+- CGNAT, mobil bağlantı ya da yönetmediğin bir modümun arkasındasın.
+- Şansı beklemek yerine hafta içinde gelir istiyorsun.
 - Sürekli senkron kalması gereken bir süreç istemiyorsun.
 
-**Yol B**'yi seç:
+**Bölüm B**'yi seç:
 
-- Zaten bir Quantus tam node'u çalıştırmak istiyorduysan.
-- Blok varyansını kaldırabilecek kadar hash gücün varsa.
-- Ödülleri üçüncü bir taraf üzerinden geçirmeye kesinlikle karşıysan.
-- Gerçek IP'si, SSD'si ve kotasız bağlantısı olan bir sunucudaysan.
+- Zaten bir Quantus tam node'u çalıştırmak istiyordun.
+- Blok varyansını kaldıracak kadar hash hızın var.
+- Ödülleri üçüncü bir taraftan geçirmeyi reddediyorsun.
+- Gerçek IP'li, SSD'li, kotasız bir sunucudasın.
 
-> **Bu karar kalıcı değil.** Cüzdan, adres ve GPU tarafı iki yolda da birebir aynı; sonradan geçmek bir akşamını alır — bkz. [Sonradan Yol Değiştirme](#sonradan-yol-değiştirme).
+> **Karar kalıcı değil.** Cüzdan, adres ve GPU'nun yaptığı iş iki yolda aynı — bkz. [Sonradan Yol Değiştirmek](#sonradan-yol-değiştirmek).
 
-### Bu rehberin yerleşimi
+### Bu rehberin düzeni
 
 ```text
   Adım 1  Cüzdan oluştur          ─┐
-  Adım 2  GPU'yu doğrula           ├─ bu ikisini herkes yapar
-                                   │
-  ── Karar Noktası ───────────────┘
+  Adım 2  GPU'yu doğrula           ├─ ikisini herkes yapar
+                                    │
+  ── Karar Noktası ──────────────┘
          │
-         ├── Yol A  A1 → A6   "Yol A Bitiş Çizgisi"nde biter
+         ├── Bölüm A  A1 → A6   "Bölüm A Bitiş Çizgisi"nde biter
          │
-         └── Yol B  B1 → B6   "Yol B Bitiş Çizgisi"nde biter
+         └── Bölüm B  B1 → B6   "Bölüm B Bitiş Çizgisi"nde biter
                  │
-  Referans bölümleri, bitirdiğin yol için geçerlidir
+  Referans bölümleri bitirdiğin yol için geçerlidir
 ```
 
-**Sadece bir bölümü yap.** Aynı makinede ikisini birden çalıştırmak, tek GPU için kavga eden iki madenci demektir; ikisi de verimsiz olur.
+**Tam olarak bir bölüm yap.** İkisini aynı makinede yapmak, tek GPU için boğuşan iki madenci demektir; ikisi de verim vermez.
 
 ---
 
 ## Donanım Gereksinimleri
 
-| Bileşen | Asgari | Önerilen |
+| Bileşen | Minimum | Önerilen |
 |---|---|---|
 | İşletim sistemi | Ubuntu 20.04+, macOS, Windows 10/11 | Ubuntu 24.04 / 26.04 LTS |
 | CPU | 2 çekirdek | 4+ çekirdek |
 | RAM | 4 GB | 8 GB+ |
-| Disk | 100 GB *(sadece Yol B)* | 500 GB+ SSD — SATA olur, HDD olmaz |
+| Disk | 100 GB *(sadece Bölüm B)* | 500 GB+ SSD — SATA olur, HDD olmaz |
 | Ağ | 3 Mbps | 10+ Mbps |
 | GPU | yok (sadece CPU, çok yavaş) | NVIDIA RTX 20/30/40/50 serisi |
 
-- Hash hızını **GPU ve madenci sürümü** belirler — disk boyutu ya da CPU önbelleği değil. Büyük önbellekli bir CPU Poseidon2'yi hızlandırmaz.
-- QPoW **VRAM'e aç değildir**. 8–12 GB fazlasıyla yeter; 140 GB'lık bir veri merkezi kartı "50 kat hızlı" değildir ve hash başına maliyette genelde bir 4090'a yenilir.
-- Node veritabanı RocksDB'dir ve rastgele I/O yapar. Her SSD iş görür; HDD senkronu tıkar.
-- **Linux ARM64 için resmî madenci binary'si yok** — Linux x86_64 ya da macOS'tan kaz. AMD GPU'lar CUDA havuz madencisiyle çalışmaz.
-- **Yol A yukarıdaki disk ve bant genişliği payına hiç ihtiyaç duymaz** — sadece GPU ve dışa UDP yeter. O satırlar Yol B için var.
+- Hash hızını **GPU ve madenci derlemesi** belirler; disk boyutu ya da CPU önbelleği değil. Büyük önbellekli CPU Poseidon2'yi hızlandırmaz.
+- QPoW **VRAM'e aç değil**. 8–12 GB fazlasıyla yeter; 140 GB'lık veri merkezi kartı "50 kat hızlı" değildir ve hash başına maliyette genelde bir 4090'a kaybeder.
+- Node veritabanı RocksDB'dir ve rastgele I/O yapar. Her SSD işe yarar; HDD senkronu tıkar.
+- **Linux ARM64'te resmî madenci binary'si yok** — Linux x86_64 ya da macOS'tan kaz. AMD GPU'lar CUDA havuz madencisiyle çalışmaz.
+- **Bölüm A'da yukarıdaki disk ve bant genişliği payı gerekmez** — sadece GPU ve dışa açık UDP.
 
 ---
 
 ## Portlar ve Uç Noktalar
 
-| Port | Amaç | Yol | Ne yapmalı |
+| Port | Amacı | Yol | Ne yapmalı |
 |---|---|---|---|
-| `30333/TCP` | Node P2P | B | İnternete bakabilecek tek port. Opsiyonel — dışa bağlantıyla da senkron olur |
-| `9833/UDP` | Madenci ↔ kendi node'un (QUIC) | B | **Sadece localhost ya da VPN.** `0.0.0.0`'a bağlanır; onu sadece güvenlik duvarın korur |
+| `30333/TCP` | Node P2P | B | İnternete bakabilecek tek port. Opsiyonel — dışa bağlantı senkron için yeter |
+| `9833/UDP` | Madenci ↔ kendi node'un (QUIC) | B | **Sadece localhost veya VPN.** `0.0.0.0`'a bağlanır; onu yalnızca güvenlik duvarın korur |
 | `9834/UDP` | Havuz madencisi → havuz node'u | A | **Sadece dışa.** Dışa UDP kapalıysa sonsuz yeniden bağlanma döngüsü |
 | `9944` | Node RPC | B | Localhost |
 | `9615` | Node Prometheus metrikleri | B | Localhost |
 | `9900` | Madenci metrikleri / `hive-stats` | A + B | Localhost |
 
-Tüm resmî bağlantılar (dokümanlar, sürümler, cüzdan, explorer, telemetri, havuz) [README.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.md) içinde toplandı.
+Tüm resmî bağlantılar: [README.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.tr.md).
 
 ---
 
@@ -215,9 +215,9 @@ Tüm resmî bağlantılar (dokümanlar, sürümler, cüzdan, explorer, telemetri
 | Durumun | Başlangıç |
 |---|---|
 | Windows PC, NVIDIA kart, henüz Linux yok | **[ubuntu.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.tr.md)** — aşağıdaki Adım 2'de biter |
-| Saatlik GPU kiralıyorsun | **[vast.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.tr.md)** — kendi içinde tam bir Yol A varyantı |
-| Ubuntu ya da macOS, sürücü çalışıyor | Adım 1'e geç |
-| Sadece genel bakış ve bağlantılar | [README.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.md) |
+| Saatlik GPU kiralıyorsun | **[vast.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.tr.md)** — kendi içinde tam bir Bölüm A varyantı |
+| Ubuntu ya da macOS, GPU sürücüsü çalışıyor | Adım 1'e geç |
+| Sadece genel bakış ve bağlantılar | [README.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.tr.md) |
 
 ---
 
@@ -227,11 +227,11 @@ Tüm resmî bağlantılar (dokümanlar, sürümler, cüzdan, explorer, telemetri
 
 ## Adım 1 — Cüzdan Oluştur
 
-Her şeyden önce bir `qz…` adresine ihtiyacın var. İki yol da aynı cüzdanı ve aynı 24 kelimeyi kullanır.
+Her şeyden önce bir `qz…` adresi gerekir. İki yol da aynı cüzdanı ve aynı 24 kelimeyi kullanır.
 
-1. [Quantus Wallet](https://www.quantus.com/wallet/) uygulamasını kur (iOS / Android — bağlantılar ayrıca [linktr.ee/quantusnetwork](https://linktr.ee/quantusnetwork) üzerinde).
-2. Cüzdanı oluştur ve **24 kelimelik ifadeyi kâğıda**, çevrimdışı yaz.
-3. Ana ekrandaki adres `qz…` ile başlar. Bir havuz formuna ya da sorgu kutusuna yapıştıracağın tek değer budur.
+1. [Quantus Cüzdanı](https://www.quantus.com/wallet/)'nı kur (iOS / Android — bağlantılar [linktr.ee/quantusnetwork](https://linktr.ee/quantusnetwork)'te de var).
+2. Cüzdan oluştur ve **24 kelimeyi çevrimdışı olarak kâğıda yaz**.
+3. Ana ekrandaki adres `qz…` ile başlar. Bir havuz formuna ya da sorgu kutusuna yapıştıracağın tek değer bu.
 
 CLI alternatifi:
 
@@ -240,23 +240,23 @@ CLI alternatifi:
 quantus wallet create --name mining
 ```
 
-> **KRİTİK:** 24 kelime, ödüllerin tek kurtarma yoludur. Onları asla bir sohbet penceresine, havuz formuna ya da kiralık sunucuya yazma. Yol A **adresini** ister; Yol B o kelimelerden **türetilen inner hash'i** ister. Hiçbir yol, kelimelerin makineni terk etmesini gerektirmez.
+> **KRİTİK:** 24 kelime, ödüllerin için tek kurtarma yolu. Onları asla bir sohbet penceresine, havuz formuna ya da kiralık sunucuya yazma. Bölüm A için **adres**, Bölüm B için o kelimelerden **türetilen inner hash** gerekir.
 
-**Bittiği an:** ekranda bir `qz…` adresi okuyabiliyorsan ve 24 kelime kâğıtta duruyorsa.
+**Bittiği an:** ekrandan bir `qz…` adresi okuyabiliyorsun ve 24 kelime kâğıtta.
 
 ---
 
 ## Adım 2 — GPU'yu Doğrula (Linux)
 
-Herhangi bir madenci kurmadan önce NVIDIA'nın kapalı kaynak sürücüsünün aktif olduğunu doğrula. Yanlış sürücü yolundaki bir madenci sessizce 4–6 kat yavaş çalışır.
+Madenci kurmadan önce NVIDIA'nın tescilli sürücüsünün aktif olduğunu doğrula. Yanlış sürücü yolunda çalışan madenci sessizce 4–6 kat yavaş kalır.
 
-> Henüz Linux yok mu? Önce **[ubuntu.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.tr.md)**'yi bitir — seni buraya geri gönderir. Kiralık GPU'da sürücüyü zaten sağlayıcı enjekte eder: bu rehber yerine **[vast.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.tr.md)** kullan.
+> Henüz Linux yok mu? Önce **[ubuntu.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.tr.md)** — seni buraya geri getirir. Kiralık GPU'da sürücüyü host zaten enjekte eder: **[vast.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.tr.md)**.
 
 ```bash
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y ubuntu-drivers-common wget curl ca-certificates netcat-openbsd jq
 
-# sadece sürücü eksikse
+# yalnızca sürücü yoksa
 sudo ubuntu-drivers autoinstall
 sudo reboot
 ```
@@ -270,36 +270,34 @@ nvidia-smi -L      # her GPU için bir satır
 
 Kart adını, sürücü sürümünü ve bir `CUDA Version` kolonunu görmelisin. Kullanımın düşük olması normal — henüz madenci çalışmıyor.
 
-> Tam `cuda-toolkit`'e **ihtiyacın yok**; hazır madenciler kendi CUDA çalışma zamanını taşır. `nvidia-smi` hiçbir şey yazmıyorsa Secure Boot'u kapat (ya da MOK anahtarını kaydet) ve yeniden başlat. RTX 50 serisi (Blackwell) güncel bir çekirdek ve 570+ sürücü ister.
+> Tam `cuda-toolkit`'e **ihtiyacın yok**; hazır madenci binary'leri kendi CUDA çalışma zamanını taşır. `nvidia-smi` hiçbir şey basmıyorsa Secure Boot'u kapat (ya da MOK anahtarını kaydet) ve yeniden başlat. RTX 50 serisi (Blackwell) güncel bir çekirdek ve 570+ sürücü ister.
 
-**Bittiği an:** `nvidia-smi -L` kartlarını adıyla listeliyorsa.
+**Bittiği an:** `nvidia-smi -L` kartını adıyla listeliyor.
 
 ---
 
 ## Karar Noktası — Yolunu Seç
 
-Ortak kurulum bitti. Bu çizgiden sonrası **ya bir yol ya diğeri**.
+Ortak kurulum bitti. Bundan sonrası **ya şu yol ya öbürü**.
 
-| Seçim | Git | Sonunda elde edeceğin |
+| Seçim | Git | Sonunda elde ettiğin |
 |---|---|---|
-| **Yol A — Havuz** | [Adım A1](#adım-a1--havuz-madencisini-kur) | Havuza hash basan tek bir `quanpool-miner` servisi, pay başına artan bakiye |
-| **Yol B — Kendi node'un** | [Adım B1](#adım-b1--otomatik-kurulum-betiği) | Senkron bir `quantus-node` artı yerel `quantus-miner`, wormhole adresine tam blok ödülleri |
+| **Bölüm A — Havuz** | [A1](#a1--havuz-madencisini-kur) | Havuza hash basan tek bir `quanpool-miner` servisi, pay başına artan bakiye |
+| **Bölüm B — Kendi node** | [B1](#b1--otomatik-kurulum-betigi) | Senkron bir `quantus-node` ve yerel bir `quantus-miner`, tam blok ödülleri |
 
-Hâlâ kararsız mısın? **Yol A**'yı yap. Bir saatte geri alınabilir, kartının ve adresinin çalıştığını kanıtlar ve sen node isteyip istemediğini düşünürken para kazanmaya başlar.
+Hâlâ emin değilsen **Bölüm A** yap. Bir saatte geri alınabilir, kartının ve adresinin çalıştığını kanıtlar ve sen düşünürken ödemeye başlar.
 
 ---
 
-# Yol A — Havuz Madenciliği (Quanpool PPLNS)
+# Bölüm A — Havuz Madenciliği (Quanpool PPLNS)
 
-> **Burada başlar.** Ön koşullar: Adım 1 (bir `qz…` adresi) ve Adım 2 (çalışan GPU sürücüsü).
-> **Bittiği yer:** [Yol A Bitiş Çizgisi](#yol-a-bitiş-çizgisi) — aşağıdaki altı adımdan sonra, işçin havuz sitesinde göründüğünde.
-> **Hiç dokunmayacağın şeyler:** `quantus-node`, zincir senkronu, içe açık güvenlik duvarı kuralları, inner hash. Bunların hiçbiri bu yola ait değil.
+> **Ön koşullar:** Adım 1 (bir `qz…` adresi) ve Adım 2 (çalışan GPU sürücüsü).
+> **Bitiş:** [Bölüm A Bitiş Çizgisi](#bölüm-a-bitiş-çizgisi).
+> **Dokunmayacakların:** `quantus-node`, zincir senkronu, gelen güvenlik duvarı kuralları, inner hash.
 
-Sürtünmesi en az olan yol: node yok, senkron yok, içe açık port yok, CGNAT arkasında çalışır. Tek bir süreç havuza dışa doğru bağlanır ve pay başına ödeme alırsın.
+> Quanpool bir **topluluk** havuzu, resmî Quantus altyapısı değil. Host adresi, indirme bağlantısı ve TLS pini [quanpool.com](https://quanpool.com/) → **Start mining** sayfasında canlı yayınlanır. Her seferinde oradan kopyala; aşağıdaki değerler bilinçli olarak yer tutucudur.
 
-> Quanpool bir **topluluk** havuzudur, resmî Quantus altyapısı değildir. Sunucu adresi, indirme bağlantısı ve TLS pin'i [quanpool.com](https://quanpool.com/) → **Start mining** sayfasında canlı yayınlanır. Her seferinde oradan kopyala; aşağıdaki değerler bilerek yer tutucudur.
-
-### Adım A1 — Havuz Madencisini Kur
+### A1 — Havuz Madencisini Kur
 
 ```bash
 sudo mkdir -p /opt/quantus
@@ -311,13 +309,13 @@ chmod u+x quanpool-miner
 ./quanpool-miner --version
 ```
 
-O sürüm 404 verirse güncel Linux bağlantısını **Start mining**'den al (6.1.0 da çalışır).
+Bu sürüm 404 verirse güncel Linux bağlantısını **Start mining**'den al (6.1.0 da çalışır).
 
-> `gpu-list` alt komutu 6.1+ sürümlerinde kaldırıldı. Kartları `nvidia-smi -L` ile say.
+> `gpu-list` alt komutu 6.1+ ile kaldırıldı. Kartları `nvidia-smi -L` ile listele.
 
-### Adım A2 — Kartı Benchmark Et
+### A2 — Kartı Benchmark Et
 
-Benchmark yerelde çalışır, havuza hiç bağlanmaz. Bunu **havuz ayarlarından önce** yap — bu rehberdeki en pahalı sorunun cevabını verir: acaba gerçekten CUDA kod yolunda mısın?
+Benchmark yereldir, havuzla hiç konuşmaz. Havuz yapılandırmasından **önce** yap — bu rehberin en pahalı sorusunu cevaplar: gerçekten CUDA yolunda mısın?
 
 ```bash
 cd /opt/quantus
@@ -327,49 +325,43 @@ cd /opt/quantus
 | Sonuç | Anlamı |
 |---|---|
 | Karta göre 400 MH/s – 1,5 GH/s | Doğru — Linux CUDA yolu |
-| Modern bir RTX kartta ~100 MH/s | **Yanlış binary ya da sürücü** — stock/wgpu yolu, 4–6 kat yavaş. Bunu sonra değil, şimdi düzelt |
+| Modern bir RTX kartında ~100 MH/s | **Yanlış binary ya da sürücü** — stock/wgpu yolu, 4–6 kat yavaş. Bunu sonra değil şimdi çöz |
 
-Masaüstünde `--cpu-workers 0` zorunlu kabul et. CPU madenciliği çekirdek başına ~15 MH/s ekler — kartın yanında önemsiz, ama kartı besleyen çekirdekleri çalar.
+Masaüstünde `--cpu-workers 0` zorunlu kabul et. CPU madenciliği iş parçacığı başına ~15 MH/s ekler — kartın yanında ihmal edilebilir, kartı besleyen çekirdekleri ise çalar.
 
-### Adım A3 — Token ve TLS Pinini Al
+### A3 — Token ve TLS Pini
 
-[quanpool.com](https://quanpool.com/) → **Start mining** sayfasında şunları doldur:
+[quanpool.com](https://quanpool.com/) → **Start mining** sayfasında doldur:
 
 | Alan | Değer |
 |---|---|
-| Address | `qz…` adresin — **asla seed değil** |
-| Worker | opsiyonel ad, **her makinede farklı**. `a-z 0-9 . - _`, en fazla 32 karakter, boşluk yok |
+| Address | `qz…` adresin — **asla seed** |
+| Worker | opsiyonel isim, **makine başına tekil**. `a-z 0-9 . - _`, en fazla 32 karakter, boşluk yok |
 | Mode | **Pool (PPLNS)** |
 | System | **Linux** |
 
-Kayıt ve şifre yoktur: adres *zaten* hesabın. `--node-addr` değerini (alan adı yerine düz `IP:9834` tercih et) ve 64 haneli onaltılık `--tls-cert-sha256` değerini kopyala. İkisini de komut satırına yapıştırmak yerine dosyaya yaz, böylece kabuk geçmişine düşmezler:
+Kayıt ve şifre yok: adres zaten hesaptır. `--node-addr` (hostname yerine düz `IP:9834` tercih et) ve 64 haneli hex `--tls-cert-sha256` değerini dosyalara yaz, böylece shell geçmişine düşmesinler:
 
 ```bash
 cd /opt/quantus
 
-# tek satır: qzADRESIN.iscininadı
+# tek satır: qzADRESIN.workeradı
 nano auth-token
 
-# Start mining'deki 64 haneli TLS pin
+# Start mining'deki 64 haneli TLS pini
 nano tls-cert-sha256
 
 chmod 600 auth-token tls-cert-sha256
 ```
 
-Token sadece adresin, bir nokta ve işçi adından oluşur:
-
-```text
-qzADRESIN.rig1
-```
-
-### Adım A4 — Manuel Çalıştırma
+### A4 — İlk Manuel Çalıştırma
 
 systemd'ye devretmeden önce bir kez ön planda çalıştır ki hataları okuyabilesin.
 
 ```bash
 cd /opt/quantus
 ./quanpool-miner serve \
-  --node-addr <POOL_HOST>:9834 \
+  --node-addr <HAVUZ_HOST>:9834 \
   --auth-token-file /opt/quantus/auth-token \
   --tls-cert-sha256-file /opt/quantus/tls-cert-sha256 \
   --cpu-workers 0 \
@@ -377,24 +369,24 @@ cd /opt/quantus
   --mode pool
 ```
 
-`<POOL_HOST>` yerine **Start mining**'deki adresi yaz ve `--gpu-devices` değerini `nvidia-smi -L` çıktısındaki kart sayısına ayarla (hepsini kullanmak için parametreyi hiç vermeyebilirsin).
+`<HAVUZ_HOST>` yerine **Start mining**'deki adresi yaz, `--gpu-devices` değerini `nvidia-smi -L` çıktısındaki kart sayısına ayarla (hepsini kullanmak için parametreyi at).
 
 İlk dakikada sağlıklı belirtiler:
 
-- `nvidia-smi` madenci sürecini ve %95–100 GPU kullanımını gösterir
-- log iş satırlarını ve `SHARE FOUND` yazar
-- `curl -s http://127.0.0.1:9900/hive-stats` dolu bir `hs` ve sıfır reddetmeli bir `ar` döndürür
+- `nvidia-smi` madenci sürecini ve %95–100 GPU kullanımını gösteriyor
+- log iş satırları ve `SHARE FOUND` basıyor
+- `curl -s http://127.0.0.1:9900/hive-stats` dolu bir `hs` ve sıfır ret içeren bir `ar` döndürüyor
 
-> İlk saniyelerde bir grup `SOLUTION LOST` / stale mesajı normaldir; madenci güncel işe yetişiyordur.
+> İlk saniyelerde bir grup `SOLUTION LOST` / stale mesajı, madenci güncel işe yetişirken normaldir.
 
-Sağlıklı göründüğünde `Ctrl+C` ile durdur. Terminalde bırakma — sonraki adım onu yeniden başlatmalara dayanıklı hale getiriyor.
+Sağlıklı göründüğünde `Ctrl+C` ile durdur — sonraki adım onu yeniden başlatmalara dayanıklı yapar.
 
-### Adım A5 — systemd Servisi Oluştur
+### A5 — systemd Servisi
 
 ```bash
 sudo tee /etc/systemd/system/quanpool-miner.service >/dev/null <<EOF
 [Unit]
-Description=Quantus pool miner (Quanpool PPLNS)
+Description=Quantus havuz madencisi (Quanpool PPLNS)
 After=network-online.target
 Wants=network-online.target
 
@@ -402,7 +394,7 @@ Wants=network-online.target
 Type=simple
 User=$USER
 WorkingDirectory=/opt/quantus
-ExecStart=/opt/quantus/quanpool-miner serve --node-addr <POOL_HOST>:9834 --auth-token-file /opt/quantus/auth-token --tls-cert-sha256-file /opt/quantus/tls-cert-sha256 --cpu-workers 0 --gpu-devices 1 --mode pool
+ExecStart=/opt/quantus/quanpool-miner serve --node-addr <HAVUZ_HOST>:9834 --auth-token-file /opt/quantus/auth-token --tls-cert-sha256-file /opt/quantus/tls-cert-sha256 --cpu-workers 0 --gpu-devices 1 --mode pool
 Restart=always
 RestartSec=8
 Nice=5
@@ -417,9 +409,9 @@ sudo systemctl status quanpool-miner --no-pager
 journalctl -u quanpool-miner -f
 ```
 
-Başlatmadan önce `ExecStart` içindeki `<POOL_HOST>`'u düzelt. `auth-token` dosyası `600` modunda, dolayısıyla burada verdiğin `User=` tarafından okunabilir olmalı.
+Başlatmadan önce `ExecStart` içindeki `<HAVUZ_HOST>`'u düzelt. `auth-token` mod `600` olduğu için buradaki `User=` tarafından okunabilir olmalı.
 
-Masaüstü kurulumda uyku modunu da kapatmak şart, aksi halde ekran kararınca GPU durur:
+Masaüstünde ayrıca uyku kapatılmalı, yoksa ekran karardığında GPU durur:
 
 ```bash
 gsettings set org.gnome.desktop.session idle-delay 300
@@ -427,9 +419,9 @@ gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'no
 gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'
 ```
 
-> Kiralık bir konteynerde genelde çalışan bir `systemd` bulunmaz. Onun yerine imajın süreç yöneticisini kullan — bkz. [vast.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.tr.md).
+> Kiralık konteynerlerde genelde çalışan bir `systemd` yoktur. Onun yerine imajın süreç yöneticisini kullan — bkz. [vast.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.tr.md).
 
-### Adım A6 — Havuzda Doğrula
+### A6 — Havuzda Doğrula
 
 Önce yerelde:
 
@@ -437,38 +429,36 @@ gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-typ
 curl -s http://127.0.0.1:9900/hive-stats
 ```
 
-`hs` genelde **kH/s** cinsindendir — `430000` ≈ 430 MH/s. `ar` değeri `[kabul, red]` demektir ve red sıfırda kalmalı; `temp`, `fan` ve `pool_rtt_ms` da raporlanır.
+`hs` genelde **kH/s**'dir — `430000` ≈ 430 MH/s. `ar` değeri `[kabul, ret]` olup ret sıfırda kalmalı; `temp`, `fan` ve `pool_rtt_ms` de raporlanır.
 
-Sonra [quanpool.com](https://quanpool.com/) adresini aç, `qz…` adresini sorgu kutusuna yapıştır ve **Look up**'a bas. İşçin birkaç dakika içinde kendi hash hızı, pay sayısı ve büyüyen bir bekleyen bakiyeyle listelenir.
+Sonra [quanpool.com](https://quanpool.com/)'u aç, `qz…` adresini sorgu kutusuna yapıştır ve **Look up**'a bas. Worker'ın birkaç dakika içinde kendi hash hızı, pay sayısı ve artan bekleyen bakiyesiyle görünür.
 
-> `9900`, `9833`, `9944` ve `9615` portları asla internete açılmamalı. Modemde bunlar için "virtual server" kuralı hiçbir işe yaramaz, sadece gerçek bir risk yaratır.
+> `9900`, `9833`, `9944` ve `9615` portları asla internete açılmamalı. Modümde bunlar için "virtual server" kuralı hiçbir şey kazandırmaz, gerçek risk yaratır.
 
-### Yol A Bitiş Çizgisi
+### Bölüm A Bitiş Çizgisi
 
-**Şu dördü doğruysa Yol A tamamlandı:**
+**Dördü de doğruysa tamamdır:**
 
-1. `systemctl status quanpool-miner` `active (running)` diyor ve yeniden başlatmadan sağ çıkıyor.
-2. `nvidia-smi` kartı %95–100 kullanımda, Adım A2 benchmark'ındaki hızda gösteriyor.
-3. `hive-stats` kabul edilen payları artarken, reddedilenleri sıfırda gösteriyor.
-4. İşçin havuz sorgu sayfasında görünüyor ve bekleyen bakiye yükseliyor.
+1. `systemctl status quanpool-miner` → `active (running)` ve yeniden başlatmadan sonra da ayakta.
+2. `nvidia-smi` A2'deki benchmark hızında %95–100 kullanım gösteriyor.
+3. `hive-stats` kabul edilen payları artıyor, ret sıfırda.
+4. Worker'ın havuz sorgu sayfasında görünüyor ve bekleyen bakiye artıyor.
 
-**Yolun sonu burası.** Kuracak başka bir şey yok: node yok, senkron yok, inner hash yok. Buradan sonra günlük beş on komut için [Günlük Komutlar ve Takip](#günlük-komutlar-ve-takip), ikinci bir rig eklemek için [Birden Fazla Makine](#birden-fazla-makine), sayıların anlamını çözmek için [Ekonomi](#ekonomi--ne-beklemeli) bölümüne geç.
-
-**Yol B'yi tamamen atla** — ta ki bir gün kendi node'unu istemeye karar verene kadar; o zaman da önce [Sonradan Yol Değiştirme](#sonradan-yol-değiştirme)'yi oku.
+Başka kurulacak bir şey yok: node yok, senkron yok, inner hash yok. [İzleme](#izleme-ve-günlük-komutlar), [Çoklu Makine](#çoklu-makine-çalıştırmak) ya da [Ekonomi](#ekonomi--ne-beklemeli) bölümlerine geç. Sonradan kendi node'unu istemedikçe **Bölüm B'yi atla** — isteyince önce [Sonradan Yol Değiştirmek](#sonradan-yol-değiştirmek)'i oku.
 
 ---
 
-# Yol B — Kendi Node'un (Resmî Yol)
+# Bölüm B — Kendi Node'un
 
-> **Burada başlar.** Ön koşullar: Adım 1 (24 kelime — inner hash'i onlardan türeteceksin) ve Adım 2 (çalışan GPU sürücüsü). Artı 100 GB+ SSD ve açık bırakmaya razı olduğun bir bağlantı.
-> **Bittiği yer:** [Yol B Bitiş Çizgisi](#yol-b-bitiş-çizgisi) — node'un zincir ucuna yetiştiğinde ve yerel bir madenci onu beslediğinde.
-> **İki geçiş yolu var:** Adım B1 resmî betiktir ve her şeyi senin yerine yapar. Adım B2–B5 aynı işin elle hâlidir. **Ya B1'i yap, ya B2–B5'i — ikisini birden değil.** B6 her durumda geçerli.
+> **Ön koşullar:** Adım 1 (24 kelime — inner hash'i onlardan türetiyorsun), Adım 2 (çalışan GPU sürücüsü), 100 GB+ SSD ve sürekli açık bırakabileceğin bant genişliği.
+> **Bitiş:** [Bölüm B Bitiş Çizgisi](#bölüm-b-bitiş-çizgisi).
+> **İki yol var:** B1 resmî betiktir, her şeyi senin için yapar. B2–B5 aynı işin manuel karşılığı. **Ya B1 ya B2–B5 — ikisi birden değil.** B6 her iki durumda geçerli.
 
-Havuz komisyonu yok ve varlık tamamen sende; karşılığında tam bir zincir senkronu ve eşleşen bir binary çifti. Linux, macOS ve WSL2'de çalışır.
+Komisyon yok ve tam kontrol var; karşılığında tam zincir senkronu ve eşleşmiş binary çifti gerekiyor. Linux, macOS ve WSL2'de çalışır.
 
-### Adım B1 — Otomatik Kurulum Betiği
+### B1 — Otomatik Kurulum Betigi
 
-Resmî betik wormhole inner hash'ini ve node kimliğini üretir, eşleşen bir çifti `~/quantus-mining/bin/` içine indirir ve `~/quantus-mining/mining.conf` dosyasını `CHAIN=mainnet` ile yazar. İşini görürse doğrudan [Yol B Bitiş Çizgisi](#yol-b-bitiş-çizgisi)'ne atlayıp senkronu bekleyebilirsin.
+Resmî betik wormhole inner hash'i ve node kimliğini üretir, eşleşmiş bir çifti `~/quantus-mining/bin/` altına indirir ve `CHAIN=mainnet` ile `~/quantus-mining/mining.conf` dosyasını yazar.
 
 ```bash
 curl -fsSL https://docs.quantus.com/scripts/quantus-mining.sh -o quantus-mining.sh
@@ -477,11 +467,11 @@ chmod +x quantus-mining.sh
 ./quantus-mining.sh start -d
 ```
 
-Günlük kontrol:
+Günlük kullanım:
 
 ```bash
-./quantus-mining.sh start          # node ön planda, madenci arkada
-./quantus-mining.sh start-node     # bir terminal
+./quantus-mining.sh start          # node ön planda, madenci arka planda
+./quantus-mining.sh start-node     # birinci terminal
 ./quantus-mining.sh start-miner    # ikinci terminal, madenci sunucusu dinlemeye başladıktan sonra
 ./quantus-mining.sh stop
 ./quantus-mining.sh config show
@@ -489,7 +479,7 @@ Günlük kontrol:
 ./quantus-mining.sh config set CPU_WORKERS 0
 ```
 
-İki `latest` etiketinin birbirinden ayrı düşmesine izin vermek yerine sürümleri sabitle:
+İki `latest` etiketinin birbirinden ayrışmasını beklemek yerine sürümleri sabitle:
 
 ```bash
 ./quantus-mining.sh config set NODE_VERSION v1.0.1
@@ -499,11 +489,11 @@ Günlük kontrol:
 ./quantus-mining.sh start -d
 ```
 
-`--force` yalnızca binary'leri yeniler: `INNER_HASH` ve wormhole adresin korunur, **yeni anahtar çifti üretilmez**. Betik node'un `miner-auth-token` ve `miner-tls-cert-sha256` dosyalarını kendisi okur, yani bunları elle kopyalamazsın. Docker modu kaldırıldı.
+`--force` yalnızca binary'leri yeniler: `INNER_HASH` ve wormhole adresini korur, **yeni anahtar çifti üretmez**. Betik node'un `miner-auth-token` ve `miner-tls-cert-sha256` dosyalarını kendisi okur, yani onları elle kopyalaman gerekmez. Docker modu kaldırıldı.
 
-> **Betik işini gördüyse burada dur** ve [Yol B Bitiş Çizgisi](#yol-b-bitiş-çizgisi)'ne geç. Adım B2–B5 aynı sonucu elle kurar — dizinler, sürümler ve servis yönetimi üzerinde kontrol istediğinde ya da betik dağıtımında patladığında işine yarar.
+> **Betik işini çözdüyse burada dur** ve [Bölüm B Bitiş Çizgisi](#bölüm-b-bitiş-çizgisi)'ne atla. B2–B5 aynı sonucu elle kurar — dizinler, sürümler ve servis yönetimi üzerinde kontrol istediğinde ya da betik dağıtımında çalışmadığında işe yarar.
 
-### Adım B2 — Manuel Kurulum: Binary'ler
+### B2 — Manuel Kurulum: Binary'ler
 
 ```bash
 sudo apt update
@@ -519,9 +509,9 @@ wget https://github.com/Quantus-Network/quantus-miner/releases/download/v4.2.0/q
 chmod +x quantus-miner
 ```
 
-Güncel etiketler için [Releases](https://github.com/Quantus-Network/chain/releases) sayfasına bak — resmî tavsiye **node v1.0.1 ya da üstü** ve iki depo birbirinden bağımsız sürümleniyor.
+Güncel etiketler için [Releases](https://github.com/Quantus-Network/chain/releases) sayfasına bak — resmî öneri **node v1.0.1 veya üstü** ve iki depo birbirinden bağımsız sürümleniyor.
 
-Devam etmeden **önce** çiftin kimlik doğrulamalı protokolü konuştuğunu teyit et — iki komut da bir eşleşme yazdırmalı:
+Devam etmeden önce çiftin kimlik doğrulamalı protokolü konuştuğunu teyit et — iki komut da eşleşen bir satır basmalı:
 
 ```bash
 ./quantus-node --help | grep miner-auth-token-file
@@ -537,61 +527,61 @@ Devam etmeden **önce** çiftin kimlik doğrulamalı protokolü konuştuğunu te
 
 macOS'ta önce Gatekeeper işaretini kaldır: `xattr -d com.apple.quarantine quantus-node`.
 
-### Adım B3 — Node Kimliği ve Wormhole Inner Hash
+### B3 — Node Kimliği ve Wormhole Inner Hash
 
 ```bash
 ./quantus-node key generate-node-key --file node_key.p2p
 ./quantus-node key quantus --scheme wormhole --words
 ```
 
-`--words` 24 kelimeyi **ekrana yazdırmadan** sorar, böylece ifade kabuk geçmişine hiç düşmez. Yazdırdığı değerleri sakla:
+`--words`, 24 kelimeyi **ekrana yazmadan** sorar; böylece ifade shell geçmişine düşmez. Bastığı değerleri sakla:
 
-| Değer | Nedir | Ne yapılır |
+| Değer | Nedir | Ne yapmalı |
 |---|---|---|
-| **Address** | wormhole adresin — ödüllerin düştüğü yer | takip için sakla |
-| **Inner Hash** | 32 baytlık ön görüntü | `--rewards-inner-hash` olarak ver |
+| **Address** | wormhole adresin — ödüller buraya düşer | izleme için sakla |
+| **Inner Hash** | 32 bytelık öngörüntü | `--rewards-inner-hash` olarak ver |
 | **Secret** | sahipliği kanıtlayan anahtar | çevrimdışı yedekle, asla paylaşma |
 
-Cüzdan uygulamandaki 24 kelimenin aynısını kullanmak önerilen yoldur — ödüller o zaman uygulamada kendiliğinden görünür. Sıfırdan bir cüzdana kazmak istersen `./quantus-node key quantus --scheme wormhole` çalıştır ve ürettiği ifadeyi yedekle. Ödüllerin wormhole adresine yönlenmesi **opsiyonel değildir**, protokole gömülüdür; aynı sebeple madencilik kimliğin zincir üzerinde ödeme adresinle ilişkilendirilemez.
+Cüzdan uygulamandaki aynı 24 kelimeyi kullanmak önerilen yoldur — ödüller uygulamada otomatik görünür. Bunun yerine yeni bir cüzdana kazmak istersen `./quantus-node key quantus --scheme wormhole` çalıştır ve ürettiği ifadeyi yedekle. Ödüllerin wormhole adresine yönlenmesi **opsiyonel değil**; protokolün içinde tanımlı ve aynı sebeple madencilik kimliğin ile ödeme adresin zincir üstünde bağlantılı görünmez.
 
-### Adım B4 — Node'u Başlat
+### B4 — Node'u Başlat
 
 ```bash
 screen -S quantus-node
 cd ~/quantus
 ./quantus-node \
-  --name <YOUR_NODE_NAME> \
+  --name <NODE_ADIN> \
   --validator \
   --miner-listen-port 9833 \
   --chain mainnet \
   --node-key-file node_key.p2p \
-  --rewards-inner-hash <YOUR_INNER_HASH> \
+  --rewards-inner-hash <INNER_HASH_DEGERIN> \
   --max-blocks-per-request 64 \
   --sync full
 ```
 
 `--name`, node'unun [telemetri](https://telemetry.quantus.cat/) sayfasında görünen adıdır.
 
-`--miner-listen-port` ile ilk açılışta node, madenci kimlik doğrulama malzemesini zincir dizinine yazar:
+`--miner-listen-port` ile ilk başlatışta node, madenci kimlik doğrulama dosyalarını zincir dizinine yazar:
 
-| Dosya | Amaç |
+| Dosya | Amacı |
 |---|---|
-| `miner-auth-token` | madencinin `Ready` içinde gönderdiği paylaşılan sır. Mod `0600`, loglanmaz |
-| `miner-tls-cert-sha256` | madenci QUIC sertifikasının SHA-256'sı; madenciler bunu sabitler |
-| `miner-tls-cert.der` / `miner-tls-key.der` | node TLS malzemesi — özel anahtarı asla bir madenciye kopyalama |
+| `miner-auth-token` | madencinin `Ready` mesajında gönderdiği ortak sır. Mod `0600`, asla loglanmaz |
+| `miner-tls-cert-sha256` | madenci QUIC sertifikasının SHA-256'sı; madenciler bunu pinler |
+| `miner-tls-cert.der` / `miner-tls-key.der` | node TLS materyali — özel anahtarı asla madenciye kopyalama |
 
 | Platform | Zincir dizini |
 |---|---|
 | Linux | `~/.local/share/quantus-node/chains/mainnet/` |
 | macOS | `~/Library/Application Support/quantus-node/chains/mainnet/` |
 
-> ⚠️ **Ödül beklemeden önce tam senkronu bekle.** Zincir ucuna varmadan kazılan bloklar öksüz kalır ve hiçbir şey kazandırmaz; node'un peer'i yokken madenci kendiliğinden bekler. Log `Syncing`'den güncel yükseklikte `Idle`'a döndüğünde senkronsun — tipik olarak 15 dakika ile birkaç saat arası. Senkron sırasında `discarding proposal` normaldir. `Verification failed` ve 0 peer ile takılma, node sürümünün ağdan koptuğu anlamına gelir — [Releases](https://github.com/Quantus-Network/chain/releases)'a bak.
+> ⚠️ **Ödül beklemeden önce tam senkronu bekle.** Tepeye ulaşmadan kazılan bloklar orphan olur ve hiçbir şey kazandırmaz; node'un eşi yoksa madenci kendiliğinden bekler. Log `Syncing`'den güncel yükseklikte `Idle`'a geçtiğinde senkronsun — genelde 15 dakika ile birkaç saat. Senkron sırasındaki `discarding proposal` normaldir. `Verification failed` ve 0 eş ile tıkanma, node sürümünün ağla uyuşmadığı anlamına gelir — [Releases](https://github.com/Quantus-Network/chain/releases)'e bak.
 
-Ayrıca madenci sunucusunun dinlemeye başladığını doğrulayan log satırını bekle. Madenci sunucusu açılışta patlarsa node kapanır — yerel madenciliğe geri dönüş yoktur.
+Ayrıca madenci sunucusunun dinlemeye başladığını bildiren log satırını bekle. Madenci sunucusu başlayamazsa node çıkar — yerel madenciliğe geri düşme yok.
 
-### Adım B5 — Harici Madenciyi Başlat
+### B5 — Harici Madenciyi Başlat
 
-İkinci bir terminalde:
+İkinci terminalde:
 
 ```bash
 screen -S quantus-miner
@@ -606,42 +596,42 @@ CHAIN_DIR="$HOME/.local/share/quantus-node/chains/mainnet"
   --tls-cert-sha256-file "$CHAIN_DIR/miner-tls-cert-sha256"
 ```
 
-Varyasyonlar: Vulkan'ın olmadığı bir NVIDIA kartta `--cuda-gpu` ekle; kullanılabilir GPU'su olmayan makinede `--cpu-workers 4 --gpu-devices 0` kullan; ısıyı ve güç çekişini sınırlamak için `--gpu-throttle-ms 50` (masaüstünü de kullanıyorsan `5`) ekle.
+Varyantlar: Vulkan'ın olmadığı NVIDIA kartlarında `--cuda-gpu` ekle; kullanılabilir GPU'su olmayan makinede `--cpu-workers 4 --gpu-devices 0` kullan; ısı ve güç tüketimini sınırlamak için `--gpu-throttle-ms 50` (masaüstünü de kullanıyorsan `5`) ekle.
 
-> Sırların kabuk geçmişinde kalmaması için satır içi biçim yerine her zaman `--auth-token-file` / `--tls-cert-sha256-file` kullan. Yanlış token ya da pin **kalıcı** bir hatadır: madenci yeniden bağlanma döngüsüne girmez, durur. Dosyaları yeniden oku.
+> Her zaman satır içi değerler yerine `--auth-token-file` / `--tls-cert-sha256-file` kullan. Yanlış token ya da pin **kalıcı** hatadır: madenci yeniden bağlanma döngüsüne girmez, durur. Dosyaları tekrar oku.
 >
-> macOS'ta `CHAIN_DIR`'i tırnak içinde kullan — yolda boşluk var.
+> macOS'ta `CHAIN_DIR`'i tırnak içinde tut — yolda boşluk var.
 
-### Adım B6 — Node/Madenci Çiftini Güncelleme
+### B6 — Node/Madenci Çiftini Güncelleme
 
-Hem betikli hem elle kurulum için geçerli:
+Betikle ve elle kurulumda aynı:
 
 1. Önce node'u, sonra madenciyi durdur.
-2. **Eşleşen** bir çift indir — ikisi de `quantus-miner/2` konuşmalı.
+2. **Eşleşmiş** bir çift indir — ikisi de `quantus-miner/2` konuşmalı.
 3. `.../chains/mainnet/` dizinini koru. Asla bir `chains/planck/` dizinini içe alma.
-4. Node'u başlat, madenci sunucusu dinlemeye geçsin, sonra madenciyi başlat.
+4. Node'u başlat, madenci sunucusunun dinlemesini bekle, sonra madenciyi başlat.
 
-### Yol B Bitiş Çizgisi
+### Bölüm B Bitiş Çizgisi
 
-**Şu beşi doğruysa Yol B tamamlandı:**
+**Beşi de doğruysa tamamdır:**
 
-1. Node logu güncel zincir yüksekliğinde `Idle` diyor ve peer sayısı stabil.
-2. `--name` değerin [telemetry.quantus.cat](https://telemetry.quantus.cat/) üzerinde görünüyor.
-3. Node, madenci sunucusunun `9833` portunda dinlediğini loglamış.
-4. Madenci bağlı, `nvidia-smi` %95–100 kullanım gösteriyor ve node tarafında `Broadcasting job` satırları akıyor.
-5. `ufw status` sadece `22/tcp` ve `30333/tcp` izniyle duruyor, **başka hiçbir şey yok** — `9833`, `9944` ve `9615` kapalı.
+1. Node logu güncel zincir yüksekliğinde `Idle` ve eş sayısı stabil.
+2. `--name` değerin [telemetry.quantus.cat](https://telemetry.quantus.cat/)'ta görünüyor.
+3. Node, madenci sunucusunun `9833`'te dinlediğini logladı.
+4. Madenci bağlı, `nvidia-smi` %95–100 kullanım gösteriyor ve node logunda `Broadcasting job` var.
+5. `ufw status` yalnızca `22/tcp` ve `30333/tcp` izin veriyor, **başka hiçbir şey yok**.
 
-**Yolun sonu burası.** Ödüller artık düzensiz aralıklarla, tam bloklar hâlinde, Adım B3'teki wormhole adresine gelir — cüzdan uygulamasından ya da explorer'dan kontrol et. Devamı için [Günlük Komutlar ve Takip](#günlük-komutlar-ve-takip), sonra da bloklar arası sessizlik seni telaşlandırmasın diye [Ekonomi](#ekonomi--ne-beklemeli).
+Artık ödüller tam blok halinde, düzensiz aralıklarla, B3'teki wormhole adresine gelir — cüzdan uygulamasından ya da explorer'dan kontrol et. [İzleme](#izleme-ve-günlük-komutlar) ve ardından [Ekonomi](#ekonomi--ne-beklemeli) bölümüne geç ki bloklar arasındaki sessizlik seni endışelendirmesin.
 
 ---
 
 # Referans
 
-Hangi yolu bitirdiysen onun için geçerli.
+Bitirdiğin yol için geçerlidir.
 
-## Günlük Komutlar ve Takip
+## İzleme ve Günlük Komutlar
 
-**Yol A — havuz**
+**Bölüm A — havuz**
 
 ```bash
 sudo systemctl status quanpool-miner --no-pager
@@ -650,19 +640,19 @@ journalctl -u quanpool-miner -f
 curl -s http://127.0.0.1:9900/hive-stats
 nvidia-smi --query-gpu=index,temperature.gpu,utilization.gpu,power.draw,fan.speed --format=csv
 
-# yeniden benchmark, ya da dışa UDP testi (nc'den yanıt gelmemesi tek başına kanıt değildir)
+# yeniden benchmark ya da dışa UDP testi (nc'den yanıt gelmemesi tek başına arıza kanıtı değil)
 ./quanpool-miner benchmark --gpu-devices 1 --cpu-workers 0 --duration 30
-nc -zvu <POOL_HOST> 9834
+nc -zvu <HAVUZ_HOST> 9834
 ```
 
-Havuzun sorgu sayfası işçileri, bekleyen bakiyeyi ve ödemeleri gösterir. Binary'yi güncellemek için: servisi durdur, yeni dosyayı indir, `chmod +x`, tekrar başlat. Mevcut sürüm çalışıyorsa çıkan güncelleme acil değildir.
+Havuzun sorgu sayfası worker'ları, bekleyen bakiyeyi ve ödemeleri gösterir. Binary güncellemek için: servisi durdur, yeni dosyayı indir, `chmod +x`, tekrar başlat.
 
-**Yol B — kendi node'un**
+**Bölüm B — kendi node**
 
 | Ne | Nerede |
 |---|---|
-| Ödüller | cüzdan uygulaması (aynı 24 kelime), ya da `https://explorer.quantus.com/accounts/<YOUR_QZ_ADDRESS>` |
-| Telemetride node | [telemetry.quantus.cat](https://telemetry.quantus.cat/) — `--name` değerini ara |
+| Ödüller | cüzdan uygulaması (aynı 24 kelime) ya da `https://explorer.quantus.com/accounts/<QZ_ADRESIN>` |
+| Node telemetride | [telemetry.quantus.cat](https://telemetry.quantus.cat/) — `--name` değerini ara |
 | Node metrikleri / RPC | `http://localhost:9615/metrics` · `http://localhost:9944` |
 | Madenci metrikleri | `http://localhost:9900/metrics` |
 
@@ -672,13 +662,13 @@ Havuzun sorgu sayfası işçileri, bekleyen bakiyeyi ve ödemeleri gösterir. Bi
 tail -f ~/.local/share/quantus-node/chains/mainnet/network/quantus-node.log
 ```
 
-Sağlıklı bir node'da peer sayısı stabildir, zincir ucunda `Idle` görürsün, `Prepared block for proposing` ve `Broadcasting job` satırları akar.
+Sağlıklı bir node stabil eş sayısı, tepede `Idle`, `Prepared block for proposing` ve `Broadcasting job` gösterir.
 
 ---
 
 ## Performans Referansı
 
-Linux CUDA havuz madencisinin stock madenciye karşı yayınlanmış değerleri, sadece GPU. Kendi kartını her zaman `benchmark --duration 30` ile teyit et.
+Linux CUDA havuz madencisi ile stock madencinin yayınlanmış değerleri, yalnızca GPU. Kendi kartını her zaman `benchmark --duration 30` ile doğrula.
 
 | Kart | Stock madenci | Linux CUDA havuz madencisi | Oran |
 |---|---|---|---|
@@ -689,25 +679,25 @@ Linux CUDA havuz madencisinin stock madenciye karşı yayınlanmış değerleri,
 | RTX 5070 | ~100 MH/s | ~410–450 MH/s | ~4,2× |
 | RTX 3080 Ti | 104 MH/s | 435 MH/s | ~4,2× |
 | RTX 5060 Ti | 75 MH/s | 314 MH/s | ~4,2× |
-| CPU, 8 worker | toplam ~120 MH/s | — | çekirdek başına ~15 MH/s |
+| CPU, 8 worker | toplam ~120 MH/s | — | iş parçacığı başına ~15 MH/s |
 
-Komisyon ve şansı yok sayan kaba gelir tahmini:
+Komisyon ve şans hariç, kaba beklenen gelir:
 
 ```text
-günlük QTC ≈ (senin H/s / ağın H/s) × (86400 / blok_saniyesi) × blok_ödülü
+günlük QTC ≈ (senin H/s / ağ H/s) × (86400 / blok_saniyesi) × blok_ödülü
 ```
 
-Her terim oynar. Zorluk her sonlanan blokta yeniden ayarlanır, dolayısıyla tek bir tüketici kartı TH/s ile ölçülen bir ağın küçük bir kesridir. Herhangi bir para birimi rakamını doğrulanmamış kabul et.
+Her terim değişken. Zorluk her finalize blokta yeniden ayarlandığı için tek bir tüketici kartı, TH/s ile ölçülen bir ağın küçük bir kesridir. Her türlü fiat rakamını doğrulanmamış kabul et.
 
-**Isı:** 7/24 kazan bir kart güç limitine yakın, fanları yukarıda çalışır. Sürekli ~70 °C normaldir ve ~83–88 °C'lik throttle noktasının çok altındadır; gerçek bakım kalemleri toz ve kasa hava akışıdır. Kart sürekli 85 °C'de duruyorsa `--gpu-throttle-ms 5` ekle.
+**Sıcaklık:** 7/24 kazan kart güç limitine yakın, fanları yüksek çalışır. Sürekli ~70 °C normaldir; throttle eşiği ~83–88 °C civarı. Gerçek bakım işi toz ve kasa hava akışı. Kart sürekli 85 °C'de duruyorsa `--gpu-throttle-ms 5` ekle.
 
 ---
 
 ## Güvenlik Duvarı
 
-**Yol A hiçbir içe kural gerektirmez** — sadece havuz portuna dışa UDP. Modemin ya da operatörün dışa UDP/QUIC'i engelliyorsa madenci yeniden bağlanma döngüsüne girer; teyit için telefon hotspot'undan dene.
+**Bölüm A'da gelen kural gerekmez** — yalnızca havuz portuna dışa UDP. Modümun ya da ISS'in dışa UDP/QUIC'i engelliyorsa madenci yeniden bağlanma döngüsüne girer; telefon hotspot'undan test ederek doğrula.
 
-**Yol B:**
+**Bölüm B:**
 
 ```bash
 sudo ufw allow 22/tcp
@@ -716,81 +706,81 @@ sudo ufw enable
 sudo ufw status verbose
 ```
 
-`9833`, `9944` ya da `9615` portlarını **açma**. Uzaktaki bir madenciyi node'a WireGuard veya Tailscale ile bağla, madenci portunu özel tut.
+`9833`, `9944` ya da `9615`'i **açma**. Uzaktaki bir madenciyi node'a WireGuard veya Tailscale ile bağla, madenci portunu özel tut.
 
-CGNAT arkasında (çoğu mobil ve pek çok ev fiber bağlantısı) içe gelen `30333` hiç ulaşmaz — kural zararsızdır ama bir işe yaramaz, node yine dışa bağlantılarla senkron olur. Modemde port yönlendirme CGNAT'ı çözemez; bunu ancak genel bir IP ya da bir VPN uç noktası çözer. Yol A'nın evde daha kolay olmasının sebebi tam olarak budur.
+CGNAT arkasında (mobil bağlantıların çoğu ve pek çok ev fiberi) gelen `30333` hiç ulaşmaz — kural zararsızdır ama işe yaramaz; node dışa bağlantılarla senkron olmaya devam eder. Port yönlendirme CGNAT'ı çözmez; bunu ancak genel IP ya da VPN uç noktası çözer. Bölüm A'nın evde daha kolay yol olmasının sebebi tam olarak bu.
 
 ---
 
-## Birden Fazla Makine
+## Çoklu Makine Çalıştırmak
 
 Birden fazla madenci **aynı** `qz…` adresine ödeme yapabilir; PPLNS payları toplanır.
 
-- Her makineye **farklı bir işçi adı** ver. Aynı adı kullanmak iki rig'i çakıştırır ve biri havuzdan kaybolur.
+- Her makineye **farklı bir worker adı** ver. Aynı adı tekrar kullanmak iki rig'i çarpıştırır ve biri havuzdan kaybolur.
 - İkinci bir makine eklemek için evdeki rig'i durdurmana gerek yok.
-- Seed'ini asla kiralık bir makineye kopyalama. Kiralık kutuya sadece `qzADRES.isci` ve TLS pin gerekir — bkz. [vast.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.tr.md).
-- Yol B tarafındaki karşılığı, VPN üzerinden tek node'un `9833` portuna bağlanan birkaç madencidir. Node işleri hepsine yayınlar, geçerli sonucu ilk bulan kazanır.
+- Seed'ini asla kiralık makineye kopyalama. Kiralık bir kutuya yalnızca `qzADRES.worker` ve TLS pini gerekir — bkz. [vast.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.tr.md).
+- Bölüm B tarafındaki karşılığı, VPN üzerinden tek node'un `9833` portuna bağlanan birden fazla madencidir. Node işleri hepsine yayar, ilk geçerli sonuç kazanır.
 
 ---
 
 ## Sorun Giderme
 
-### Yol A — havuz
+### Bölüm A — havuz yolu
 
-| Belirti | Neye bakmalı |
+| Belirti | Ne kontrol edilir |
 |---|---|
-| `timed out` / bitmeyen yeniden bağlanma | Havuz portuna dışa **UDP**. Ev güvenlik duvarları ve bazı operatör yolları QUIC'i keser — telefon hotspot'undan dene |
-| `certificate` / `fingerprint` hatası | TLS pin'i **Start mining**'den yeniden kopyala; tam 64 onaltılık karakter |
-| İşçi sitede hiç görünmüyor | `auth-token` içindeki adres sorguladığından farklı, ya da işçi adı kurallara uymuyor. 2–3 dakika tanı |
-| Modern kartta benchmark ~100 MH/s | CUDA sürümü değil — yanlış binary ya da sürücü. `nvidia-smi`'yi kontrol et |
-| Hâlâ `127.0.0.1:9833`'ü gösteriyor | O Yol B adresi; havuz madenciliği havuz sunucusunun `9834` portunu kullanır |
+| `timed out` / sonsuz yeniden bağlanma | Havuz portuna dışa **UDP**. Ev güvenlik duvarları ve bazı ISS hatları QUIC'i engeller — telefon hotspot'undan test et |
+| `certificate` / `fingerprint` hatası | TLS pinini **Start mining**'den yeniden kopyala; tam 64 hex karakter |
+| Worker sitede hiç görünmüyor | `auth-token` içindeki adres sorguladığından farklı ya da worker adı kurallara uymuyor. 2–3 dakika tanı |
+| Modern kartta ~100 MH/s benchmark | CUDA derlemesi değil — yanlış binary ya da sürücü. `nvidia-smi`'ye bak |
+| Hâlâ `127.0.0.1:9833`'e bakıyor | O adres Bölüm B'nin; havuz madenciliği havuz host'unun `9834`'ünü kullanır |
 | Servis `running` ama GPU %0 | Logu oku: token, pin ya da `--node-addr` yanlış |
-| Rig ekledikten sonra evdeki işçi kayboldu | Aynı işçi adı. Birini yeniden adlandır ve ikisini de başlat |
-| Makine boşa çıkınca madencilik duruyor | Uyku hâlâ açık — Adım A5'teki `gsettings` komutlarını tekrar uygula |
+| Rig ekleyince evdeki worker kayboldu | Worker adı çakışması. Birini yeniden adlandır ve ikisini de yeniden başlat |
+| Makine boşa çıkınca madencilik duruyor | Uyku hâlâ açık — A5'teki `gsettings` komutlarını tekrar uygula |
 
-### Yol B — kendi node'un
+### Bölüm B — kendi node yolu
 
-| Belirti | Neye bakmalı |
+| Belirti | Ne kontrol edilir |
 |---|---|
-| Madenci hemen kapanıyor | Kimlik doğrulama ya da sürüm: madenci sunucusunun dinlemesini bekledin mi, iki auth dosyası var mı, iki binary de `quantus-miner/2` konuşuyor mu |
+| Madenci hemen çıkıyor | Kimlik doğrulama ya da sürüm: madenci sunucusunun dinlemesini bekledin mi, iki auth dosyası var mı, iki binary de `quantus-miner/2` konuşuyor mu |
 | TLS `no application protocol` | Node ve madenci uyumsuz bir çift |
-| Yanlış token ya da pin | Tasarımı gereği kalıcı hata — dosyaları yeniden oku, körlemesine tekrar denemeyin |
-| `Verification failed`, 0 peer | Node sürümü ağdan kopmuş |
-| Senkron hiç bitmiyor | Bant genişliği 3 Mbps altında, ya da SSD yerine HDD |
-| Windows'ta senkron takılıyor | Defender RocksDB dizinini tarıyor — dışlama ekle, ya da WSL2 kullan |
-| Kazıyor ama ödül yok | Hâlâ senkron (öksüz bloklar), yanlış inner hash, ya da cüzdanından farklı bir seed |
-| Node madenci portunda kapanıyor | Bind, TLS ya da token hatası. Yerel madenciliğe geri dönüş yok |
+| Yanlış token ya da pin | Tasarım gereği kalıcı hata — dosyaları yeniden oku, körü körüne tekrar deneme |
+| `Verification failed`, 0 eş | Node sürümü ağla uyuşmuyor |
+| Senkron hiç bitmiyor | Bant genişliği 3 Mbps altında ya da SSD yerine HDD |
+| Windows'ta senkron tıkıyor | Defender RocksDB dizinini tarıyor — istisna ekle ya da WSL2 kullan |
+| Kazan ama ödül gelmeyen | Hâlâ senkron (orphan), yanlış inner hash ya da cüzdanından farklı bir seed |
+| Node madenci portunda çıkıyor | Bind, TLS ya da token hatası. Yerel madenciliğe geri düşme yok |
 | Linux ARM64'te madenci yok | x86_64 ya da macOS'tan kaz |
 
-Windows'ta senkrondan önce node veri dizinini Defender'dan dışla:
+Windows'ta senkrondan önce node veri dizinini Defender'dan muaf tut:
 
 ```powershell
 Add-MpPreference -ExclusionPath "$env:USERPROFILE\.quantus"
 ```
 
-> Kimlik doğrulama öncesi sürümlerde (node v0.9.0, madenci v3.3.1 ve öncesi) madenci doğrulaması yoktur. Bunları güncel mainnet'e karşı kullanma.
+> Kimlik doğrulamasız eski sürümlerde (node v0.9.0, madenci v3.3.1 ve öncesi) madenci kimlik doğrulaması yoktur. Güncel mainnet'e karşı kullanma.
 
 ---
 
 ## Ekonomi — Ne Beklemeli
 
-**Emisyon.** Blok ödülleri `(MaxSupply − CurrentSupply) / EmissionDivisor` formülünü izler — sabit 21.000.000 arzın yumuşak eksponansiyel azalması, halving uçurumu yok. Madenciler zamanla **arzın %50'sini** alır ve tüm arzın kabaca %99'u yaklaşık 40 yılda dağıtılır. Blok ödülleri üzerindeki geliştirici vergisi %15'i şirkete ayırır, yıllar içinde hak edilerek.
+**Emisyon.** Blok ödülleri `(MaxSupply − CurrentSupply) / EmissionDivisor` formülünü izler — sabit 21.000.000 arzın yumuşak eksponansiyel azalması, halving uçurumu yok. Madenciler zamanla **toplam arzın %50'sini** alır ve arzın yaklaşık %99'u şu 40 yıl içinde çıkar. Blok ödüllerinin %15'i şirkete geliştirme vergisi olarak gider ve yıllar boyunca hak edilir.
 
-**Zincir üstü ücretler.** Standart transferler madenciye giden sabit bir ücret öder. Yüksek güvenlikli geri alınabilir transferler hacme bağlı bir ücret öder ve o ücret yakılır; ZK'da toplanan işlemler ise madenci ile yakma arasında bölünen daha küçük bir hacim ücreti öder. Dolayısıyla madencilik geliri ağırlıklı olarak ücretlerden değil emisyondan gelir.
+**Zincir üstü ücretler.** Standart transferler sabit bir ücret öder ve bu madenciye gider. Yüksek güvenlikli geri alınabilir transferler hacme göre ücret öder ve bu yakılır; ZK ile birleştirilmiş işlemler daha küçük bir hacim ücreti öder ve bu madenci ile yakım arasında bölünür. Yani madencilik geliri ezici çoğunlukla emisyondan gelir, ücretlerden değil.
 
-**Yol A — PPLNS nasıl öder.** Sana **blok başına değil, pay başına** ödenir. Hiçbir blok "senin" değildir; bakiyen sürekli birikir ve bütün mesele de budur — varyansı ortadan kaldırır. Havuz sabit bir komisyon alır ve tek bir eşiğin üstünde ödeme yapar; ikisi de havuz sitesinde yayınlanır, ikisi de zaman içinde değişmiştir. Bu yüzden o değerleri hiçbir rehberdeki sayıya değil (bu rehber dâhil) siteye bakarak öğren. Havuz içindeki solo modu aynı komisyonu taşır ama loto gibi öder.
+**Bölüm A — PPLNS nasıl öder.** **Blok başına değil, pay başına** ödersin. Hiçbir blok "senin" olmaz; bakiyen sürekli artar ve zaten amacı bu — varyansı kaldırır. Havuz sabit bir komisyon alır ve tek bir eşiğin üstünde ödeme yapar; ikisi de havuz sitesinde yayınlıdır ve zamanla değişmiştir, bu yüzden bu rehber dahil hiçbir dokümandaki rakama güvenme, oradan oku. Havuz içindeki solo modu aynı komisyonu alır ama piyango gibi öder.
 
-**Yol B — solo nasıl öder.** Sıfır komisyon, tam kontrol ve kazandığın her seferde bir tam blok ödülü. TH/s ile ölçülen bir ağa karşı tek bir tüketici kartıyla bu, uzun sessizlikler demek olabilir. Bir şey bozuk değil; varyans, paylaşmamanın bedeli.
+**Bölüm B — solo nasıl öder.** Komisyon yok, tam kontrol var ve kazandığında tam bir blok ödülü. Tek bir tüketici kartıyla TH/s'lik bir ağa karşı bu, uzun sessizlikler demek olabilir. Bir şey bozuk değil; varyans, paylaşmamanın bedeli.
 
-**Gelirini ne oynatır.** Zorluk her sonlanan blokta yeniden ayarlanır, yani ağın hash gücü artarken rig'in hiç değişmese bile günlük QTC'n düşer. Kendi sayıların her tablodan değerlidir: `benchmark` ile ölç, sonra havuzun canlı ağ hash gücüyle karşılaştır.
+**Gelirini ne oynatır.** Zorluk her finalize blokta yeniden ayarlanır; ağ hash hızı yükselirse rig'in hiç değişmese de günlük QTC'n düşer. `benchmark` ile ölç, sonra havuzun canlı ağ hash hızıyla karşılaştır.
 
-> QTC piyasa verisi sığdır ve birim, resmî dokümanların ve araçların bir kısmında `QUAN` olarak etiketlenir — alakasız tickerlarla karıştırmak çok kolay. Herhangi bir fiyat projeksiyonunu spekülatif kabul et.
+> QTC piyasa verisi sığ ve birim resmî dokümanların ve araçların bir kısmında `QUAN` diye etiketli. Her fiat projeksiyonunu spekülatif kabul et.
 
 ---
 
-## Sonradan Yol Değiştirme
+## Sonradan Yol Değiştirmek
 
-İki yol cüzdanı, adresi ve GPU tarafını paylaşır; bu yüzden geçiş ucuzdur.
+İki yol cüzdanı, adresi ve GPU işini paylaştığı için arasında geçiş ucuzdur.
 
 **A → B (havuzdan kendi node'una)**
 
@@ -798,27 +788,27 @@ Add-MpPreference -ExclusionPath "$env:USERPROFILE\.quantus"
 sudo systemctl disable --now quanpool-miner
 ```
 
-Sonra [Adım B1](#adım-b1--otomatik-kurulum-betiği)'den başla. Inner hash'i **aynı** 24 kelimeden türet, ödüller aynı cüzdan uygulamasına düşmeye devam eder. Havuzdaki bekleyen bakiyeye dokunma — normal takviminde ödenir.
+Sonra [B1](#b1--otomatik-kurulum-betigi)'den başla. Inner hash'i **aynı** 24 kelimeden türet, ödüller aynı cüzdan uygulamasına düşmeye devam eder. Havuzdaki bekleyen bakiyeye dokunma — normal takviminde ödenir.
 
 **B → A (kendi node'undan havuza)**
 
-Önce madenciyi, sonra node'u durdur. Geri dönme ihtimalin varsa `chains/mainnet/` dizinini sakla; yeniden senkrondan kurtarır. Sonra aynı `qz…` adresiyle [Adım A1](#adım-a1--havuz-madencisini-kur)'den başla.
+Önce madenciyi, sonra node'u durdur. Geri dönme ihtimalin varsa `chains/mainnet/` dizinini sakla; yeniden senkrondan kurtarır. Sonra aynı `qz…` adresiyle [A1](#a1--havuz-madencisini-kur)'den başla.
 
-**İkisini birden çalıştırmak bir strateji değil.** Tek GPU'daki iki madenci birbirini yarıya düşürür. İki kartın varsa her yola `--gpu-devices` ile ayrı bir kart ve ayrı servis ver — yoksa birini seç.
+**İkisini birden çalıştırmak strateji değil.** Tek GPU'da iki madenci birbirini yarıya düşürür. İki kartın varsa `--gpu-devices` ve ayrı servislerle her yola bir kart ver — aksi halde birini seç.
 
 ---
 
-## Sıradaki Adımlar
+## Sonraki Adımlar
 
 | Hedef | Doküman |
 |---|---|
 | Windows PC'yi madencilik makinesine çevirmek | [ubuntu.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.tr.md) |
 | Saatlik GPU kiralamak | [vast.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.tr.md) |
-| Ağ bilgileri, bağlantılar ve yol karşılaştırması | [README.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.md) |
+| Ağ bilgileri, bağlantılar ve yol karşılaştırması | [README.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.tr.md) |
 
 ---
 
 ## Yazar Hakkında
 
-Bu rehber **HazenNetworkSolutions** tarafından hazırlandı.
+**HazenNetworkSolutions** tarafından hazırlandı.
 🌐 [hazennetworksolutions.com](https://hazennetworksolutions.com)

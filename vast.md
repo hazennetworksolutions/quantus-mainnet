@@ -1,15 +1,13 @@
 <div align="center">
 
-# ☁️ Quantus Mining on a Rented GPU (Vast.ai)
+# ☁️ Quantus Mining on a Rented GPU
 
-**Rent an NVIDIA GPU by the hour and run the Quantus pool miner on it — no hardware, no node, no seed phrase on the box**
-*Instance selection, SSH keys, miner install, supervisor persistence, cost control and teardown — step by step.*
+**Mine QTC on hourly GPU rental — no hardware, no chain sync, no seed phrase on the box**
+*Instance selection, SSH, CUDA miner, supervisor autostart, cost control, teardown.*
 
-[![Vast.ai](https://img.shields.io/badge/Marketplace-Vast.ai-1A73E8?style=flat-square)](https://vast.ai)
 [![Quantus](https://img.shields.io/badge/Quantus-Mainnet-6C4DF6?style=flat-square)](https://quantus.com)
-[![GPU](https://img.shields.io/badge/GPU-NVIDIA%20CUDA-76B900?style=flat-square&logo=nvidia&logoColor=white)](https://docs.quantus.com/guides/mining/)
-[![Mode](https://img.shields.io/badge/Mode-Pool%20PPLNS-orange?style=flat-square)](https://quanpool.com/)
-[![Persistence](https://img.shields.io/badge/Service-supervisor-yellow?style=flat-square)](http://supervisord.org/)
+[![GPU](https://img.shields.io/badge/GPU-NVIDIA%20CUDA-76B900?style=flat-square&logo=nvidia&logoColor=white)](https://docs.quantus.com/deep-dives/qpow)
+[![Pool](https://img.shields.io/badge/Mode-Pool%20PPLNS-orange?style=flat-square)](https://quanpool.com/)
 
 [hazennetworksolutions.com](https://hazennetworksolutions.com)
 
@@ -18,229 +16,127 @@
 ---
 
 > **Author:** HazenNetworkSolutions
-> **Target:** a rented NVIDIA container on a GPU marketplace, billed per hour
-> **Result:** `quanpool-miner` under supervisor, surviving reboots, no wallet material on the host
+> **Route:** pool mining only — the rented-GPU variant of [guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md) Part A
+> **Versions:** pool miner 6.2.0
 > **Last Updated:** September 2026
 
 ---
 
-## Scope
+## What This Is
 
-| Stage | Document |
-|---|---|
-| Rent a GPU and mine on it | **This guide** |
-| Mining concepts, the A/B decision, own-node route | → [guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#the-two-routes--a-or-b) |
-| Use your own Windows PC instead | → [ubuntu.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.md) |
-| Network overview and links | [README.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.md) |
+Renting a GPU by the hour (Vast.ai and similar marketplaces) lets you mine without owning hardware. You get a container with the NVIDIA driver already injected, you install one binary, and you pay per hour for as long as it runs.
 
-This sets up a plain NVIDIA Ubuntu image, `quanpool-miner`, and a supervisor program so the miner restarts by itself. It does **not** set up your own node, put your seed phrase anywhere, or change a rig you already run at home.
+**Pool mining only.** Running your own node on a rented box means paying by the hour to sync 100 GB of chain data that disappears when the instance is destroyed. If you want your own node, use hardware you keep — [guide.md Part B](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#part-b--your-own-node).
 
-**How this relates to the main guide.** guide.md splits mining into two routes: **Part A** (pool only) and **Part B** (your own node). This document is a **self-contained Part A variant for rented hardware** — it replaces guide.md Step 2 and Steps A1–A6 with the container equivalents, because a rented box has no persistent identity, no static address and no reason to sync a chain.
+**Three rules for rented machines:**
 
-```text
-guide.md  Step 1   create a wallet          ← the one thing you still do there
-      ↓
-vast.md   Step 1 → 11                       ← everything else happens here
-      ↓
-vast.md   Cost Control and Teardown         ← where this route ends
-```
+1. Your 24-word phrase **never** goes on the box. The miner only needs your public `qz…` address.
+2. Rent is charged whether or not the miner is running. Benchmark first, then decide.
+3. Only **Destroy** stops billing. Stopping an instance still costs money for stored data.
 
-**Starts here:** with a `qz…` address from [guide.md → Step 1](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#step-1--create-a-wallet). That is the only prerequisite.
-**Ends at:** [Step 11](#step-11--verify-on-the-pool), when your worker shows up on the pool page — followed by [Cost Control and Teardown](#cost-control-and-teardown), which is not optional reading on metered hardware.
-**Never touched here:** `quantus-node`, chain sync, inbound firewall rules, wormhole inner hash. If you want that route instead, you want your own machine and [Part B](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#part-b--your-own-node-official-path).
-
-> ⚠️ **Nothing secret goes on a rented machine.** The box needs exactly two values: `qzYOURADDRESS.workername` and the pool's TLS pin. Your 24 words, wallet file and node inner hash stay off it. Assume the host operator can see every file and every process.
+**Prerequisites:** a `qz…` address ([guide.md Step 1](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#step-1--create-a-wallet)) and the host address plus TLS pin from [quanpool.com](https://quanpool.com/) → **Start mining**.
 
 ---
 
-## Table of Contents
+## Step 1 — Create an SSH Key
 
-- [What a GPU Marketplace Is](#what-a-gpu-marketplace-is)
-- [Step 1 — Account and Credit](#step-1--account-and-credit)
-- [Step 2 — Choose the Right Card](#step-2--choose-the-right-card)
-- [Step 3 — Pick an Image, Not a Template](#step-3--pick-an-image-not-a-template)
-- [Step 4 — Search Filters and Renting](#step-4--search-filters-and-renting)
-- [Step 5 — SSH Key and First Connection](#step-5--ssh-key-and-first-connection)
-- [Step 6 — First Checks Inside the Container](#step-6--first-checks-inside-the-container)
-- [Step 7 — Install the Miner](#step-7--install-the-miner)
-- [Step 8 — Token and TLS Pin](#step-8--token-and-tls-pin)
-- [Step 9 — First Manual Run](#step-9--first-manual-run)
-- [Step 10 — Make It Persistent with supervisor](#step-10--make-it-persistent-with-supervisor)
-- [Step 11 — Verify on the Pool](#step-11--verify-on-the-pool)
-- [Cost Control and Teardown](#cost-control-and-teardown)
-- [Security Checklist](#security-checklist)
-- [Troubleshooting](#troubleshooting)
-
----
-
-## What a GPU Marketplace Is
-
-Vast.ai is a marketplace where independent hosts rent out GPUs by the hour. You pay from a prepaid balance, a container starts on someone else's machine, and you connect over SSH. Most instances are **containers, not virtual machines**: you appear to be `root`, but you cannot load kernel modules or run Docker inside.
-
-Three consequences shape this whole guide:
-
-1. **Billing is continuous.** A running instance consumes credit whether the GPU is busy or idle. Destroying it is the only thing that stops the meter.
-2. **`systemd` usually does not work.** Long-running processes go under the image's **supervisor**.
-3. **Storage is disposable.** Without an attached volume, **Destroy deletes everything** — miner, token file, logs.
-
-Rented mining only makes sense as pool mining: a rented box has no persistent identity, no static address and no reason to sync a chain, so [Part B of guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#part-b--your-own-node-official-path) is not the route here.
-
----
-
-## Step 1 — Account and Credit
-
-1. Create an account at [vast.ai](https://vast.ai) (console also at [cloud.vast.ai](https://cloud.vast.ai)).
-2. Under **Billing**, add credit. Your runway is `balance ÷ hourly price`.
-3. Two console pages matter: **Search** (offers you can rent) and **Instances** (boxes you are paying for).
-
-Enable two-factor authentication and use a password you do not reuse — a compromised marketplace account is a direct financial loss.
-
----
-
-## Step 2 — Choose the Right Card
-
-Quantus QPoW (Poseidon2) is **compute-bound, not VRAM-bound**: 8–12 GB is plenty. This is the most expensive misunderstanding on a rented GPU — an 80–140 GB datacenter card is not "tens of times faster" here, and costs several times more per hour. Consumer cards usually win decisively on cost per hash.
-
-Approximate Linux CUDA throughput, for sizing only — confirm your own instance with `benchmark`:
-
-| Card | Approximate hash rate | Note |
-|---|---|---|
-| RTX 4090 | ~1.1 GH/s | Usually the best cost per hash |
-| RTX 5090 | above a 4090 | Check the hourly price before assuming it wins |
-| RTX 4070 / 5070 | ~410–460 MH/s | Two roughly match one 4090 |
-| RTX 3080 / 3080 Ti | ~430 MH/s | 10–12 GB is sufficient |
-| H100 / H200 / B200 | a 4090 to a few times that | VRAM is wasted; hourly cost rarely justifies it |
-
-> **"Rent a monster for an hour and find my own block"** does not work. Against a network measured in TH/s, a few hours of one box is a lottery ticket. PPLNS pays you for shares instead, so the same rented hash rate earns steadily.
-
-Unverified hosts at very low prices are sometimes genuinely cheap and sometimes unusable — an image stuck in **Loading**, an HDD, 40 Mbps of bandwidth. On a first attempt prefer **Verified** hosts with NVMe, 200+ Mbps and a recent CUDA driver. If an instance misbehaves, destroy it and take another offer; you are out a few cents.
-
----
-
-## Step 3 — Pick an Image, Not a Template
-
-Do **not** select an LLM, ComfyUI or CUDA-devel template. They pull tens of gigabytes of layers you will never use, and you pay while they download.
-
-You want a **plain NVIDIA Ubuntu base image** with the driver injected by the host — typically the marketplace's own base or Jupyter CUDA image. The miner is a single ~13 MB download you add yourself.
-
-| Setting | Choice |
-|---|---|
-| Template | None / the plain base image |
-| Instance disk | 16–32 GB is plenty |
-| Volume | Not required — but without one, Destroy erases everything |
-| GPU count | Whatever the offer provides; pass the same number as `--gpu-devices` |
-
-A Jupyter interface may be running. You do not have to use it, and you should not expose anything else through it.
-
----
-
-## Step 4 — Search Filters and Renting
-
-Narrow the Search list before renting:
-
-- **GPU model:** the consumer cards from Step 2.
-- **Number of GPUs:** start with **1×**. A two-card box costs about twice as much and delivers about twice the hash rate — there is no discount for learning on a big box.
-- **Disk:** at least ~16 GB.
-- **Verified / NVMe / bandwidth:** as above.
-
-Read the price as **$/hour**: `$0.17/hr × 24 ≈ $4.10/day`. Prices far below market for a given card deserve suspicion rather than excitement.
-
-Press **Rent**, then watch **Instances**. **Loading** means the image is still being pulled; if it is still loading after 10–15 minutes, destroy it and pick another offer. A ready instance shows status **running** with the GPU near 0% — nothing is mining yet.
-
----
-
-## Step 5 — SSH Key and First Connection
-
-The marketplace authenticates with an **SSH public key**, not a password. Generate a dedicated key — do not reuse the one for your personal servers:
+On your own machine:
 
 ```bash
-mkdir -p ~/.ssh
-chmod 700 ~/.ssh
-ssh-keygen -t ed25519 -f ~/.ssh/vast_quantus -N '' -C 'vast-quantus'
-chmod 600 ~/.ssh/vast_quantus
+ssh-keygen -t ed25519 -f ~/.ssh/vast_quantus -C "quantus-mining"
 cat ~/.ssh/vast_quantus.pub
 ```
 
-Copy the printed `ssh-ed25519 AAAA…` line — that is the **public** half and is safe to paste into the console. The extensionless file (`vast_quantus`) is the private key and never leaves your machine.
-
-In **Instances**, open the SSH / key panel, paste the public key into the *add key* field, and confirm it appears in the list. Give it a few seconds to propagate.
-
-The panel also shows a connection line shaped like `ssh -p <PORT> root@<HOST_IP> -L 8080:localhost:8080`. The port and address differ for every instance, and the `-L 8080` tunnel is for Jupyter, not mining. Connect with your dedicated key:
-
-```bash
-ssh -p <PORT> -i ~/.ssh/vast_quantus \
-  -o IdentitiesOnly=yes \
-  -o StrictHostKeyChecking=accept-new \
-  root@<HOST_IP>
-```
-
-On `Permission denied (publickey)`: wait a few seconds, confirm the key is listed on *that* instance, and check the path after `-i`. If the host's firewall blocks direct SSH, use the console's proxy SSH address. From Windows, the same command works in Windows Terminal.
+Paste the public key into the marketplace's SSH-keys page. Never upload the private key anywhere.
 
 ---
 
-## Step 6 — First Checks Inside the Container
+## Step 2 — Pick an Instance
+
+| Criterion | What to look for |
+|---|---|
+| GPU | RTX 4090 / 5090 for throughput; 3080 Ti / 4070 for cost per hash |
+| Reliability | 99%+ — low-reliability hosts vanish mid-run |
+| Image | any CUDA / PyTorch image with the driver preinstalled |
+| Disk | 20 GB is plenty — you are not storing a chain |
+| Internet | outbound UDP must work; avoid heavily filtered hosts |
+| Price | compare $/hour against the card's benchmark, not its name |
+
+A datacenter card with 80–140 GB of VRAM is **not** proportionally faster: QPoW barely uses VRAM, so a consumer 4090 usually wins on cost per hash.
+
+Interruptible/spot instances are cheaper but can be paused at any moment. For mining that is acceptable — with supervisor autostart, work resumes when the instance does.
+
+---
+
+## Step 3 — Connect
 
 ```bash
-nvidia-smi -L
+ssh -i ~/.ssh/vast_quantus -p <PORT> root@<HOST>
 nvidia-smi
+nvidia-smi -L
 ```
 
-Confirm the card count, driver version and CUDA version. `quanpool-miner` carries its own CUDA runtime, so any reasonably recent host driver works on Ada and Ampere; a 50-series (Blackwell) card needs CUDA 12.8+ on the host.
+If `nvidia-smi` fails, the host is broken — destroy the instance and rent another; do not troubleshoot someone else's driver stack by the hour.
 
-The image may print a welcome banner pointing at its own documentation — worth reading, because it tells you which supervisor layout the image uses. Treat it as a manual, not as instructions to run blindly.
-
-One detail decides where you install: a path under `/workspace` survives a stop/start of the same container, but **not** a Destroy unless you attached a volume.
+> Do not source the portal's exit/cleanup helper scripts in your shell. They can terminate your session in some images.
 
 ---
 
-## Step 7 — Install the Miner
+## Step 4 — Install the Miner
 
-Confirm the current version and download link on [quanpool.com](https://quanpool.com/) → **Start mining**. At the time of writing the Linux CUDA build is **6.2.0**.
+Use `/workspace` when the image provides it — it is the persistent volume.
 
 ```bash
-mkdir -p /workspace/quantus
-cd /workspace/quantus
+mkdir -p /workspace/quantus && cd /workspace/quantus
+apt-get update -qq && apt-get install -y -qq wget curl ca-certificates netcat-openbsd jq
+
 wget -O quanpool-miner https://download.quanpool.com/quanpool-miner-6.2.0-linux-x86_64
 chmod u+x quanpool-miner
 ./quanpool-miner --version
-
-# optional local benchmark — never contacts the pool, but you are billed for the time
-./quanpool-miner benchmark --cpu-workers 0 --duration 20
 ```
 
-Compare the result against Step 2. Roughly 100 MH/s on a modern card means you are not on the CUDA path — see the table in [guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#step-a2--benchmark-the-card).
-
-> The `gpu-list` subcommand was removed in 6.1+. Count cards with `nvidia-smi -L`.
+Take the current download link from **Start mining** if that version is gone.
 
 ---
 
-## Step 8 — Token and TLS Pin
+## Step 5 — Benchmark Before Committing
 
-Use the **same `qz…` address** as your other machines and a **different worker name**. PPLNS shares from all your workers add up; duplicate names collide and one disappears from the pool.
+This is the whole point of doing it in this order: the benchmark tells you whether the rental is worth its hourly price, and it never contacts the pool.
 
-Worker name rules: `a-z 0-9 . - _`, max 32 characters, no spaces. Avoid an obvious name like `pc1` on a shared host.
+```bash
+cd /workspace/quantus
+./quanpool-miner benchmark --gpu-devices 1 --cpu-workers 0 --duration 30
+```
+
+| Result | Action |
+|---|---|
+| 400 MH/s – 1.5 GH/s depending on the card | Continue |
+| ~100 MH/s on a modern RTX card | Wrong driver path on this host — destroy and rent elsewhere |
+| Far below the card's published figure | The GPU is shared or throttled — destroy it |
+
+---
+
+## Step 6 — Credentials
+
+From [quanpool.com](https://quanpool.com/) → **Start mining**, using your `qz…` address and a worker name unique to this instance:
 
 ```bash
 cd /workspace/quantus
 
-# one single line: qzYOURADDRESS.uniqueworker
+# single line: qzYOURADDRESS.vast01
 nano auth-token
 
-# the 64-hex TLS pin from Start mining
+# the 64-hex TLS pin
 nano tls-cert-sha256
 
 chmod 600 auth-token tls-cert-sha256
 ```
 
-The pin is the same for everyone on the pool, but copy it from the site rather than an old note — it changes when the pool rotates its certificate. Never pass these values inline with `--auth-token`; the file flags keep them out of the shell history.
-
-Set `--gpu-devices` to the number of lines from `nvidia-smi -L`. Omitting the flag makes the miner try every card.
+> Never paste your seed phrase. The address is public information and is all the pool needs to credit you. Give every rented instance its own worker name, or two rigs will collide and one will vanish from the pool.
 
 ---
 
-## Step 9 — First Manual Run
-
-Take the live pool address from **Start mining** — it has the shape `IP:9834`:
+## Step 7 — First Manual Run
 
 ```bash
 cd /workspace/quantus
@@ -253,26 +149,23 @@ cd /workspace/quantus
   --mode pool
 ```
 
-Healthy signs: GPU utilisation near 98%, `SHARE FOUND` in the log, and a populated response with zero rejects from `curl -s http://127.0.0.1:9900/hive-stats`.
+Healthy within a minute: GPU utilisation at 95–100%, `SHARE FOUND` lines in the log, and `hive-stats` reporting a hash rate with zero rejects. A burst of stale-job messages at startup is normal.
 
-Round-trip time from a rented datacenter can be higher than from home (300–400 ms is not unusual). That does not reduce your hash rate — the pool adjusts share difficulty. A continuous `timed out` loop is different: that host blocks outbound UDP/QUIC, so destroy the instance and rent in another region.
-
-Stop with `Ctrl+C`, then move it under supervisor — otherwise the miner dies with your SSH session.
+If it loops on `timed out`, outbound UDP is blocked on this host — destroy it and rent another. `Ctrl+C` once it looks healthy.
 
 ---
 
-## Step 10 — Make It Persistent with supervisor
+## Step 8 — Autostart with supervisor
 
-The base image's pattern is a script in `/opt/supervisor-scripts/` plus a matching config in `/etc/supervisor/conf.d/`.
+Containers usually have no working `systemd`, so the systemd unit from guide.md does not apply. Most marketplace images ship **supervisor** instead.
 
 ```bash
-cat > /opt/supervisor-scripts/quanpool-miner.sh << 'EOF'
-#!/bin/bash
-utils=/opt/supervisor-scripts/utils
-. "${utils}/logging.sh"
-. "${utils}/environment.sh"
-cd /workspace/quantus
-exec /workspace/quantus/quanpool-miner serve \
+mkdir -p /opt/supervisor-scripts
+
+cat > /opt/supervisor-scripts/quanpool-miner.sh <<'EOF'
+#!/usr/bin/env bash
+cd /workspace/quantus || exit 1
+exec ./quanpool-miner serve \
   --node-addr <POOL_HOST>:9834 \
   --auth-token-file /workspace/quantus/auth-token \
   --tls-cert-sha256-file /workspace/quantus/tls-cert-sha256 \
@@ -280,29 +173,17 @@ exec /workspace/quantus/quanpool-miner serve \
   --gpu-devices 1 \
   --mode pool
 EOF
-chmod 755 /opt/supervisor-scripts/quanpool-miner.sh
-```
 
-Set `<POOL_HOST>` to the live address and `--gpu-devices` to your card count before continuing.
+chmod +x /opt/supervisor-scripts/quanpool-miner.sh
 
-> Do not source the image's portal-exit helper in this script. It can decide that a program missing from the portal list should be skipped, which silently stops your miner from starting.
-
-```bash
-cat > /etc/supervisor/conf.d/quanpool-miner.conf << 'EOF'
+cat > /etc/supervisor/conf.d/quanpool-miner.conf <<'EOF'
 [program:quanpool-miner]
-environment=PROC_NAME="%(program_name)s"
 command=/opt/supervisor-scripts/quanpool-miner.sh
 autostart=true
 autorestart=true
 startsecs=8
-stopasgroup=true
-killasgroup=true
-stopsignal=TERM
-stopwaitsecs=15
 stdout_logfile=/var/log/portal/quanpool-miner.log
 redirect_stderr=true
-stdout_logfile_maxbytes=50MB
-stdout_logfile_backups=3
 EOF
 
 supervisorctl reread
@@ -310,86 +191,80 @@ supervisorctl update
 supervisorctl status quanpool-miner
 ```
 
-The state goes `STARTING` → `RUNNING` after a few seconds; CUDA warm-up takes 10–20 seconds. Day-to-day:
+Edit `<POOL_HOST>` in the script before starting. `autorestart=true` brings the miner back after a crash or a resumed spot instance.
 
 ```bash
-supervisorctl status quanpool-miner
 supervisorctl restart quanpool-miner
+supervisorctl stop quanpool-miner
 tail -f /var/log/portal/quanpool-miner.log
+```
+
+> No supervisor in the image? Run the miner inside `tmux` or `screen` and accept that a container restart needs a manual start.
+
+---
+
+## Step 9 — Verify
+
+```bash
 curl -s http://127.0.0.1:9900/hive-stats
 nvidia-smi --query-gpu=index,temperature.gpu,utilization.gpu,power.draw --format=csv
 ```
 
-Leave the image's own management programs (portal, tunnel manager, reverse proxy) running — they are how the console reaches the box.
-
-> **Never publish port `9900`.** Metrics are for you, over SSH, on localhost. Opening a port on a rented box exposes it to the whole internet.
+`hs` is usually kH/s (`430000` ≈ 430 MH/s) and `ar` is `[accepted, rejected]`; rejected should stay at zero. Then look your `qz…` address up on [quanpool.com](https://quanpool.com/) — the worker appears within a few minutes.
 
 ---
 
-## Step 11 — Verify on the Pool
+## Step 10 — Cost Control
 
-Open [quanpool.com](https://quanpool.com/), paste your `qz…` address and press **Look up**. The new worker appears within a few minutes, alongside any rigs you already run.
+Rent accrues by the hour regardless of hash rate, so the arithmetic is simple: **hourly rent versus the QTC that hash rate earns.** Check it in the first hour, not the first week.
 
-`hs` is reported in **kH/s** — `440000` ≈ 440 MH/s. A two-card instance shows two GPU rows, and rejects should stay at zero. A burst of `SOLUTION LOST` / stale messages in the first seconds is normal; after a few minutes you should see steady `SHARE FOUND` lines.
+- Note the measured hash rate from Step 5 and compare it against the pool's live network hash rate.
+- Difficulty re-adjusts on every finalized block, so yesterday's estimate can be wrong today.
+- Set a spending limit or credit alert in the marketplace account.
+- Interruptible instances are cheaper; with autostart they suit mining well.
+- Storage is billed even while an instance is stopped.
 
-### Finish Line
-
-The rented route is complete when all five are true:
-
-1. `supervisorctl status quanpool-miner` reports `RUNNING`.
-2. `nvidia-smi` shows 95–100% utilisation at roughly the hash rate you expected from Step 2.
-3. `hive-stats` shows accepted shares climbing and rejects at zero.
-4. The worker is visible on the pool lookup page under your `qz…` address, with a name no other machine uses.
-5. You know the hourly price and have decided when you will Destroy the instance.
-
-There is nothing further to install. What remains is money management, below.
+Rented GPU mining is only profitable when the card is cheap and the network hash rate is low. Treat every projection as unverified and re-check weekly.
 
 ---
 
-## Cost Control and Teardown
+## Step 11 — Teardown
 
-Your spend is the hourly price multiplied by the time the instance exists.
+1. `supervisorctl stop quanpool-miner`
+2. Confirm your pending balance on the pool lookup page — it stays with your address, not the instance.
+3. **Destroy** the instance in the marketplace UI. Stopping is not enough; only Destroy ends billing.
+4. Remove the SSH key from the marketplace account if you are done for good.
 
-| Action | What happens |
-|---|---|
-| Stop the miner (`supervisorctl stop`) | GPU goes idle, **you are still billed** |
-| **Stop** the instance | Container stops; billing and disk retention depend on the host's policy |
-| **Destroy** the instance | Instance and disk deleted, billing ends. Miner, token and logs are gone |
-| **Reboot** | With `autostart=true`, supervisor brings the miner back |
-
-When you are finished, **Destroy**. A forgotten instance quietly eats your balance, and stopping the miner alone does not stop the bill.
-
-Renting the same offer again is a fresh install unless you attached a volume — run this guide from Step 5. Reusing the worker name is fine once the old instance is gone.
+Unclaimed pool balance is unaffected by destroying the instance: it is tied to your `qz…` address and pays out on the pool's normal schedule.
 
 ---
 
 ## Security Checklist
 
-- [ ] No seed phrase, wallet file or node inner hash anywhere on the instance
-- [ ] A dedicated SSH key for rented boxes, not your personal server key
-- [ ] `auth-token` and `tls-cert-sha256` are mode `600`, passed by file and never inline
-- [ ] Port `9900` and the miner port are not exposed publicly
-- [ ] The worker name differs from every other machine you run
-- [ ] You know the hourly price, and you will Destroy when finished
+| Rule | Why |
+|---|---|
+| Seed phrase never touches the box | The host operator can read the filesystem |
+| Only the `qz…` address and TLS pin live on it | Both are public or instance-specific |
+| Secrets in `chmod 600` files, never inline | Shell history and process lists are readable |
+| No inbound ports opened | Pool mining is outbound-only |
+| `9900` stays on localhost | Miner metrics are not for the internet |
+| One worker name per instance | Duplicate names make rigs collide |
+| Destroy when finished | Stopped instances still bill for storage |
 
 ---
 
 ## Troubleshooting
 
-| Symptom | What to check |
+| Symptom | Fix |
 |---|---|
-| Instance stuck on **Loading** for 15+ minutes | Slow host storage or a huge image. Destroy, take a Verified NVMe offer |
-| `Permission denied (publickey)` | Key added to *that* instance, correct path after `-i`, wait a few seconds |
-| Direct SSH never connects | Host firewall — use the console's proxy SSH address |
-| `nvidia-smi` missing, or no GPU listed | Wrong image, or the GPU was not passed through. Recreate elsewhere |
-| CUDA or PTX error | Host driver too old, or a 50-series card with an older build. Try the current miner or another offer |
-| Endless `timed out` / reconnecting | That host blocks outbound UDP on the pool port. Destroy and rent in another region |
+| `timed out` / endless reconnect | Outbound UDP blocked on the host — destroy and rent another |
 | `certificate` / `fingerprint` error | Re-copy the 64-hex TLS pin from **Start mining** |
-| Worker never appears on the site | Address in `auth-token` vs the one you looked up, worker name rules, allow 2–3 minutes |
-| supervisor `RUNNING` but GPU at 0% | Read the log: token, pin or `--node-addr` is wrong. `supervisorctl tail quanpool-miner` |
-| Around 100 MH/s on a strong card | Not the CUDA path — wrong binary, or wrong GPU flags |
-| Home worker disappeared | You reused the home worker name. Rename this one and restart both |
-| Miner dies when SSH closes | Still running in the foreground — finish Step 10 |
+| Benchmark ~100 MH/s on a modern card | Host driver path is wrong — do not pay to debug it |
+| `nvidia-smi` missing or no devices | Broken host image — destroy it |
+| Worker not on the pool page | Address or worker name wrong in `auth-token`; allow 2–3 minutes |
+| Miner gone after a restart | supervisor config missing or `autostart=false` |
+| `systemctl` not found | Expected in containers — use supervisor |
+| Session dies unexpectedly | Do not source the portal exit helper; use `tmux` |
 
 ---
 
@@ -397,13 +272,13 @@ Renting the same offer again is a fresh install unless you attached a volume —
 
 | Goal | Document |
 |---|---|
-| Mining concepts, pool details, own-node route | [guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md) |
-| Convert a Windows PC into a mining machine | [ubuntu.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.md) |
+| Full pool and own-node reference | [guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md) |
+| Move to your own hardware | [ubuntu.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.md) |
 | Network facts and links | [README.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.md) |
 
 ---
 
 ## About the Author
 
-This guide was prepared by **HazenNetworkSolutions**.
+Prepared by **HazenNetworkSolutions**.
 🌐 [hazennetworksolutions.com](https://hazennetworksolutions.com)

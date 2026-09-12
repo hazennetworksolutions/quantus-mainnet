@@ -1,14 +1,13 @@
 <div align="center">
 
-# 🐧 Windows PC → Ubuntu Desktop for Quantus Mining
+# 🐧 Ubuntu Install for Quantus Mining
 
-**Install Ubuntu on a spare disk without losing Windows, and get the NVIDIA driver working**
+**Turn a Windows PC with an NVIDIA card into a Linux mining machine — without losing Windows**
+*USB stick, dual boot on a spare SSD, GPU driver, then hand off to the mining guide.*
 
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%20%7C%2026.04%20LTS-E95420?style=flat-square&logo=ubuntu&logoColor=white)](https://ubuntu.com/download/desktop)
-[![Quantus](https://img.shields.io/badge/Quantus-Mainnet-6C4DF6?style=flat-square)](https://quantus.com)
 [![GPU](https://img.shields.io/badge/GPU-NVIDIA%20CUDA-76B900?style=flat-square&logo=nvidia&logoColor=white)](https://docs.quantus.com/deep-dives/qpow)
-[![Boot](https://img.shields.io/badge/Boot-UEFI%20%C2%B7%20GPT-blue?style=flat-square)](https://rufus.ie/en/)
-[![Dual Boot](https://img.shields.io/badge/Windows-Preserved-0078D4?style=flat-square&logo=windows&logoColor=white)](https://ubuntu.com/tutorials/install-ubuntu-desktop)
+[![Quantus](https://img.shields.io/badge/Quantus-Mainnet-6C4DF6?style=flat-square)](https://quantus.com)
 
 [hazennetworksolutions.com](https://hazennetworksolutions.com)
 
@@ -17,255 +16,177 @@
 ---
 
 > **Author:** HazenNetworkSolutions
-> **Target:** a Windows 10/11 desktop with an NVIDIA GPU and a spare SSD
-> **Result:** bare-metal Ubuntu with a working CUDA driver, Windows untouched
+> **Purpose:** prepare the operating system only — no mining software is installed here
+> **Ends at:** [guide.md → Step 1](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#step-1--create-a-wallet)
 > **Last Updated:** September 2026
 
 ---
 
-## Scope
+## Why Bother
 
-This document does exactly one job: it turns a Windows machine into a working Ubuntu machine with a live NVIDIA driver. **No miner, no wallet, no seed phrase, and no choice about pooling yet.**
+The same card mines **4–6× faster** under Linux CUDA than with the Windows miner. An RTX 4090 goes from ~179 MH/s to over 1.1 GH/s. The install below takes about an hour; it pays for itself on day one.
 
-**Where this ends:** at [Step 8](#step-8--final-check). From there you continue in the main guide, which starts with two shared steps and only then asks you to pick a route:
+This document ends where the mining begins. When you reboot into a working Ubuntu desktop with `nvidia-smi` printing your card, continue with **[guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md)** and pick pool mining (Part A) or your own node (Part B).
 
-```text
-ubuntu.md  Step 1 → 8      you are here
-      ↓
-guide.md   Step 1  create a wallet
-guide.md   Step 2  verify the GPU   (a 2-minute re-check of what you built here)
-guide.md   Decision Point → Part A (pool) or Part B (own node)
-```
-
-Do not skip ahead to Part A or Part B from here. The wallet in guide.md Step 1 is a prerequisite for both.
-
-Renting a GPU instead? → [vast.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.md) · Network overview → [README.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.md)
-
-**Why bother:** the fast CUDA path exists only on Linux. The Windows miner is **4–6× slower** on the same card — ~100 MH/s versus 400–450 MH/s on a mid-range RTX.
+**You need:** a Windows PC with an NVIDIA GPU, an 8 GB+ USB stick, and either a **spare SSD** or an empty partition. Renting a GPU instead? Skip all of this and read [vast.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.md).
 
 ---
 
-## Table of Contents
+## Pick a Version
 
-- [What You Need](#what-you-need)
-- [Step 1 — Download and Verify the ISO](#step-1--download-and-verify-the-iso)
-- [Step 2 — Write the USB with Rufus](#step-2--write-the-usb-with-rufus)
-- [Step 3 — BIOS and Boot Menu](#step-3--bios-and-boot-menu)
-- [Step 4 — Identify the Target Disk](#step-4--identify-the-target-disk)
-- [Step 5 — Install Ubuntu](#step-5--install-ubuntu)
-- [Step 6 — Updates and the NVIDIA Driver](#step-6--updates-and-the-nvidia-driver)
-- [Step 7 — Disable Suspend](#step-7--disable-suspend)
-- [Step 8 — Final Check](#step-8--final-check)
-- [Troubleshooting](#troubleshooting)
-
----
-
-## What You Need
-
-| Item | Requirement |
+| Your GPU | Install |
 |---|---|
-| PC | Windows 10/11 booting in **UEFI** mode (Legacy/CSM off) |
-| GPU | NVIDIA RTX 20/30/40/50 series — AMD does not work with the CUDA miner |
-| Disk | A **separate SSD** with nothing valuable on it — the installer erases it |
-| USB stick | 8 GB+. Rufus wipes it, so back it up first |
-| Network | Wired Ethernet preferred — the installer downloads drivers |
+| RTX 20 / 30 / 40 series | **Ubuntu 24.04 LTS** — the safe default |
+| RTX 50 series (Blackwell) | **Ubuntu 26.04 LTS** — newer kernel, driver 570+ |
 
-Three ground rules:
-
-1. **Bare metal.** Not WSL, not a VM.
-2. **Keep Windows.** One OS per physical disk. Avoid *Install alongside Windows*, which squeezes Ubuntu onto the Windows drive.
-3. **No seed phrase on this machine.** Wallet creation happens on your phone — [guide.md → Step 1](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#step-1--create-a-wallet).
+Always choose **Desktop LTS**. Non-LTS releases lose support in nine months, and Server adds nothing useful for a mining box.
 
 ---
 
 ## Step 1 — Download and Verify the ISO
 
-1. From [ubuntu.com/download/desktop](https://ubuntu.com/download/desktop), take the **Intel/AMD 64-bit Desktop** LTS image — not an ARM ISO.
-2. RTX 50-series (Blackwell) needs a newer kernel: prefer **26.04.x**. For 30/40-series, 24.04 LTS is fine.
-3. Download `SHA256SUMS` from the same page and verify in PowerShell:
+Download the Desktop ISO from [ubuntu.com/download/desktop](https://ubuntu.com/download/desktop), then verify it in PowerShell:
 
 ```powershell
-Get-FileHash .\ubuntu-*-desktop-amd64.iso -Algorithm SHA256
+Get-FileHash -Algorithm SHA256 "$env:USERPROFILE\Downloads\ubuntu-24.04-desktop-amd64.iso"
 ```
 
-> ⚠️ If the hash does not match the `SHA256SUMS` line, delete the ISO and download it again. Never write a corrupt image.
+Compare the output with the `SHA256SUMS` file published next to the download. A mismatch means a corrupted file — download again rather than installing it.
 
 ---
 
-## Step 2 — Write the USB with Rufus
+## Step 2 — Write the USB Stick
 
-Get Rufus from [rufus.ie](https://rufus.ie/en/) — the signature must read **Akeo Consulting**. The portable `.exe` is enough.
+Use [Rufus](https://rufus.ie/) (portable build is fine).
 
-| Rufus field | Value |
+| Setting | Value |
 |---|---|
-| Device | **The USB stick** — verify this twice |
-| Boot selection | The ISO you just verified |
-| Persistent partition size | **0** |
+| Device | your USB stick — **check twice, it gets erased** |
+| Boot selection | the Ubuntu ISO |
 | Partition scheme | **GPT** |
 | Target system | **UEFI (non CSM)** |
-| File system | Large FAT32 (Rufus picks it) |
-| Quick format | on · bad-block check: off |
+| File system | FAT32, default cluster size |
+| Persistent partition size | **0** |
 
-Press **START**. If asked about ISOHybrid mode, choose **ISO image mode**, not DD. Wait for **READY**, then eject.
-
-> A "Windows User Experience" prompt means you picked a Windows ISO by mistake.
+Write in **ISO mode** if Rufus asks. Keep persistence at zero: this stick is an installer, not a live system, and persistence causes confusing boot behaviour.
 
 ---
 
-## Step 3 — BIOS and Boot Menu
+## Step 3 — Boot from USB
 
-Boot menu is usually **F11 / F12 / F8 / Esc**; BIOS setup is **Del / F2**.
+1. Reboot and open the firmware menu (`F2`, `F10`, `F12`, `Del` or `Esc`, depending on the vendor).
+2. Pick the **UEFI** entry for your USB stick — not the legacy/CSM one.
+3. Choose **Try or Install Ubuntu**.
 
-| Setting | What to do |
-|---|---|
-| Boot entry | Pick the one prefixed **UEFI:** — never `Legacy` or `CSM` |
-| Secure Boot | Supported, but if `nvidia-smi` is empty later, **disabling it** is the quickest fix |
-| Intel RST / RAID | Ubuntu needs AHCI. If RST is on and Windows is installed, research your board before switching — it can break Windows |
-
-Boot the USB and choose **Try or Install Ubuntu**. Do not launch the installer yet — do Step 4 first.
+If the USB does not appear, disable Fast Boot in the firmware, and consider disabling Secure Boot now: the proprietary NVIDIA driver needs either Secure Boot off or an enrolled MOK key.
 
 ---
 
 ## Step 4 — Identify the Target Disk
 
-A wrong disk choice destroys Windows, and two identical SSDs look the same in the installer's dropdown. Identify the disk from a terminal in the live session (`Ctrl+Alt+T`) **before** starting the installer.
+**This is the step that prevents a wiped Windows drive.** From the live session terminal:
 
 ```bash
-lsblk -o NAME,SIZE,TYPE,FSTYPE,LABEL,MODEL        # disks and their partitions
-sudo lsblk -d -o NAME,SIZE,MODEL,SERIAL,TRAN,ROTA # physical disks, model + serial
+lsblk -o NAME,SIZE,TYPE,FSTYPE,LABEL,MODEL
+sudo lsblk -d -o NAME,SIZE,MODEL,SERIAL,TRAN,ROTA
+sudo blkid | grep -i ntfs      # NTFS = Windows, do not touch
+sudo fdisk -l
 ```
 
-Typical output:
-
-```text
-NAME        SIZE TYPE FSTYPE LABEL    MODEL
-sda         1.8T disk        —        <disk model>
-├─sda1      100M part vfat   SYSTEM
-├─sda2       16M part
-└─sda3      1.8T part ntfs   Windows
-sdb       465.8G disk        —        <disk model>
-nvme0n1   931.5G disk        —        <disk model>
-└─nvme0n1p1 931.5G part ntfs Games
-```
-
-How to read it:
-
-| What you see | What it is | Decision |
-|---|---|---|
-| Small `vfat` (~100–500 MB) **+** large `ntfs` | Windows system disk — that `vfat` is the Windows EFI partition | **Never select** |
-| `ntfs` partitions, no EFI partition | Data / game / backup drive | **Never select** |
-| No partitions, or ones you emptied yourself | Your target | ✅ This one |
-| `ROTA` = `1` | A spinning HDD, not an SSD | Avoid |
-
-Cross-check before committing:
-
-```bash
-sudo blkid | grep -i ntfs    # which partitions hold Windows filesystems
-sudo fdisk -l /dev/sdb       # full partition table of your candidate
-```
-
-If `fdisk -l` shows an `EFI System` or `Microsoft reserved` partition, that is a Windows disk — stop and re-read the list.
-
-Write down the exact device, size and model (e.g. `/dev/sdb, 465.8G`). You will match that string on the installer's summary screen.
-
-> ⚠️ Two identical disks? Use the `SERIAL` column, or physically unplug the one you must not touch. Guessing is not an option.
+Write down the target device node (`/dev/nvme1n1`, `/dev/sdb`, …) by matching **model, serial and size**, not by guessing the letter. The disk holding your Windows NTFS partitions is off limits.
 
 ---
 
-## Step 5 — Install Ubuntu
+## Step 5 — Install
 
-Start the installer, pick language and keyboard, plug in Ethernet, choose **Interactive installation**, and tick **Install third-party software / NVIDIA drivers**.
+Run **Install Ubuntu** and choose:
+
+- Normal installation
+- **Install third-party software for graphics and Wi-Fi hardware** — tick this; it pulls the NVIDIA driver during setup
+- Download updates while installing, if your connection allows
 
 At the disk step:
 
-- Choose **Erase disk and install Ubuntu** and point it at the device from Step 4 — nothing else.
-- **Never** use *Install alongside Windows*.
-- Leave off: TPM / full-disk encryption (it can conflict with NVIDIA drivers) and ZFS.
+| Situation | Choose |
+|---|---|
+| Empty spare SSD, Windows on another disk | **Erase disk and install Ubuntu**, then explicitly select that spare disk |
+| One disk shared with Windows | **Install alongside Windows**, or use Manual to place `/` on free space |
 
-On the summary screen, match the model and size against your note. **If the string does not match exactly, stop.**
+> ⚠️ "Erase disk" erases the **selected** disk completely. Confirm the device node from Step 4 on the summary screen before continuing. If the summary mentions your Windows disk, stop and go back.
 
-Set a username, machine name and strong password. Automatic login is convenient on a dedicated mining box; keep it off on a laptop. Remove the USB and reboot.
-
-> If GRUB landed on the Windows EFI partition, set the Windows drive first in the BIOS boot order and pick Ubuntu from the boot menu. Cosmetic annoyance — never "fix" it by erasing a disk.
+Set a username and password you will actually remember — every command later uses `sudo`. Remove the USB stick when prompted and reboot.
 
 ---
 
-## Step 6 — Updates and the NVIDIA Driver
+## Step 6 — Install the GPU Driver
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y ubuntu-drivers-common wget curl ca-certificates netcat-openbsd jq
-```
-
-If the installer did not provide the driver:
-
-```bash
+sudo apt install -y ubuntu-drivers-common
 sudo ubuntu-drivers autoinstall
 sudo reboot
 ```
 
-Then confirm it is live:
+After the reboot:
 
 ```bash
 nvidia-smi
-nvidia-smi -L    # one line per GPU — this count becomes --gpu-devices
+nvidia-smi -L
 ```
 
-You want the card name, driver version and a `CUDA Version` column. Low utilisation is expected — nothing is mining yet.
+You should see the card name, the driver version and a `CUDA Version` column.
 
-If it is empty or missing: disable Secure Boot and reboot → or run `ubuntu-drivers devices` and install the recommended driver explicitly → on a 50-series card, confirm the driver is 570+.
+| Problem | Fix |
+|---|---|
+| `nvidia-smi` not found or no devices | Secure Boot is blocking the module — disable it in firmware or enroll the MOK key, then reboot |
+| RTX 50-series not recognised | Needs driver 570+; install Ubuntu 26.04 or add the graphics-drivers PPA |
+| Screen stuck at low resolution | Boot the previous kernel entry and rerun `ubuntu-drivers autoinstall` |
 
-> You do **not** need `cuda-toolkit`. The miners carry their own CUDA runtime; a working `nvidia-smi` is all that matters.
+> You do **not** need the full `cuda-toolkit`. The prebuilt Quantus miners ship their own CUDA runtime; the driver is enough.
 
 ---
 
-## Step 7 — Disable Suspend
+## Step 7 — Stop the Machine Sleeping
 
-A blank screen is fine — **suspend stops the GPU**. Run these as your desktop user inside a graphical session:
+A suspended desktop mines nothing. GNOME:
 
 ```bash
 gsettings set org.gnome.desktop.session idle-delay 300
-gsettings set org.gnome.desktop.screensaver lock-enabled false
 gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
 gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'
 ```
 
-`idle-delay 300` blanks the display after five minutes; `0` never blanks it.
+Also set **Settings → Power → Automatic Suspend: Off**. On a headless box, also mask system sleep:
+
+```bash
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+```
 
 ---
 
-## Step 8 — Final Check
+## Step 8 — Final Checklist
 
-This is the end of this document. Tick every box before you leave it:
+| Check | Command | Expected |
+|---|---|---|
+| Ubuntu version | `lsb_release -a` | 24.04 or 26.04 LTS |
+| GPU visible | `nvidia-smi -L` | your card, by name |
+| Windows still bootable | reboot into the firmware menu | Windows entry present |
+| Disk space | `df -h /` | 100 GB+ free if you plan Part B |
+| Network | `ping -c 3 quantus.com` | replies |
+| No suspend | `gsettings get … sleep-inactive-ac-type` | `'nothing'` |
 
-- [ ] Ubuntu is on the disk from Step 4 only, and Windows still boots
-- [ ] `nvidia-smi` shows card, driver and CUDA version
-- [ ] You know how many GPUs `nvidia-smi -L` reports
-- [ ] Suspend is disabled
-- [ ] `apt` reaches the internet
-- [ ] No seed phrase was typed on this machine
-
-✅ All ticked → continue at **[guide.md → Step 1: Create a Wallet](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#step-1--create-a-wallet)**.
-
-That wallet plus a quick GPU re-check in Step 2 are the shared setup for both routes; the [Decision Point](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#decision-point--pick-your-route) then sends you to **Part A** (pool, easiest at home) or **Part B** (your own node). If you want to read the trade-off before you get there: [The Two Routes](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#the-two-routes--a-or-b).
+All six green? The machine is ready.
 
 ---
 
-## Troubleshooting
+## Next Step
 
-| Problem | What to check |
-|---|---|
-| USB will not boot | Pick the **UEFI:** entry in the boot menu; rewrite with GPT + UEFI (non CSM) |
-| ISO checksum mismatch | Re-download from ubuntu.com |
-| Unsure which disk to erase | Re-run Step 4. Identical disks → use `SERIAL` or unplug one |
-| Installer refuses the disk | Intel RST/RAID is on, or it is part of a Windows dynamic volume |
-| Windows seems gone | Set the Windows drive first in the boot order. **Erase nothing** |
-| `nvidia-smi` empty or missing | `sudo ubuntu-drivers autoinstall`, disable Secure Boot, reboot |
-| Driver fine but hash rate low later | Not a driver issue — see [the benchmark table](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#step-a2--benchmark-the-card) |
-| Mining stops when idle | Re-apply Step 7 inside a graphical session |
-| No Wi-Fi after install | Use Ethernet, or `sudo ubuntu-drivers autoinstall` + reboot |
+Continue with **[guide.md → Step 1 — Create a Wallet](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#step-1--create-a-wallet)**. Step 2 there repeats the `nvidia-smi` check, so you can move through it quickly, then choose:
 
-Official walkthrough: [Install Ubuntu Desktop](https://ubuntu.com/tutorials/install-ubuntu-desktop).
+- **Part A — pool mining:** one binary, one service, income within days.
+- **Part B — your own node:** full sync, zero fees, whole block rewards.
+
+Undecided? Part A is the reversible choice.
 
 ---
 

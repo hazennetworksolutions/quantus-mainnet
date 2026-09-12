@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚛️ Quantus — GPU Mining & Full Node Setup Guides
+# ⚛️ Quantus — GPU Mining & Full Node Guides
 
 **Mine QTC on Quantus mainnet — on your own PC or a rented GPU, in a pool or on your own node**
 
@@ -23,42 +23,42 @@
 
 ---
 
-## 📚 Start Here
+## Start Here
 
-Three documents, one decision. Read the decision first — it saves you installing the wrong thing.
+Four documents. Pick by what you already have, not by curiosity — it saves you installing the wrong thing.
 
 | If this is you | Read |
 |---|---|
-| Ubuntu or macOS ready, driver working | **[guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md)** — the main mining guide |
-| Windows PC with an NVIDIA card, no Linux yet | **[ubuntu.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.md)** → then [guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md) |
+| Ubuntu or macOS ready, GPU driver working | **[guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md)** — the main mining guide |
+| Windows PC with an NVIDIA card, no Linux yet | **[ubuntu.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/ubuntu.md)** → then guide.md |
 | No hardware — renting a GPU by the hour | **[vast.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.md)** |
-| Not sure whether to pool or run a node | [guide.md → The Two Routes](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#the-two-routes--a-or-b) |
+| Undecided between pool and own node | [guide.md → The Two Routes](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#the-two-routes--a-or-b) |
 
 > Linux CUDA is **4–6× faster** than the Windows miner on the same card. The Ubuntu detour pays for itself immediately.
 
 ---
 
-## 🧭 The Two Routes, in One Paragraph
+## The Two Routes
 
-Mining needs two jobs done: a **node** that follows the chain and builds block candidates, and a **miner** that grinds nonces. In **Part A** a pool operator runs the node and you run only the miner — no sync, no open ports, income arrives as a steady trickle of shares. In **Part B** you run both yourself — a full sync, zero fees, full custody, and the whole block reward whenever you win. Same wallet, same GPU work, so the choice is reversible. The full comparison and a decision checklist live in [guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#the-two-routes--a-or-b).
+Mining needs two jobs done: a **node** that follows the chain and builds block candidates, and a **miner** that grinds nonces. In **Part A** a pool operator runs the node and you run only the miner. In **Part B** you run both — full sync, no fees, the whole block reward when you win. Same wallet, same GPU work, so the choice is reversible.
 
 | Route | You run | Fees | Income shape | Best for |
 |---|---|---|---|---|
 | Pool (PPLNS) | miner only | pool fee, published on the pool site | steady trickle | a single home GPU |
 | Rented GPU + pool | the same miner, billed hourly | pool fee + rent | steady trickle | no hardware of your own |
-| Own node + miner | `quantus-node` + `quantus-miner` | none | rare lumps | custody, no fees, more work |
+| Own node + miner | `quantus-node` + `quantus-miner` | none | rare lumps | custody, zero fees, more work |
 
 ---
 
-## 📋 What Quantus Is
+## What Quantus Is
 
-A post-quantum Proof-of-Work Layer 1 on Substrate, built as a store of value rather than a smart-contract platform. Post-quantum signatures (ML-DSA / Dilithium) ship from block one, and **QPoW** replaces SHA-256 with double Poseidon2 hashing so that mining work can be verified inside ZK proofs — the reason for Poseidon2 is circuit efficiency, not extra quantum resistance.
+A post-quantum Proof-of-Work Layer 1 on Substrate, built as a store of value rather than a smart-contract platform. Post-quantum signatures (ML-DSA / Dilithium) ship from block one, and **QPoW** replaces SHA-256 with double Poseidon2 hashing so mining work can be verified inside ZK proofs — the reason for Poseidon2 is circuit efficiency, not extra quantum resistance.
 
-Mainnet launched **9 September 2026**. There is no stake requirement and no validator set — anyone with a GPU can mine. Rewards go only to **wormhole addresses** derived from your seed phrase, so mining income is private by default and needs no claim step.
+Mainnet launched **9 September 2026**. There is no stake requirement and no validator set: anyone with a GPU can mine. Rewards are paid only to **wormhole addresses** derived from your seed phrase, so mining income is private by default and needs no claim step.
 
 ---
 
-## ⚙️ Network Facts
+## Network Facts
 
 | Field | Value |
 |---|---|
@@ -76,13 +76,13 @@ Mainnet launched **9 September 2026**. There is no stake requirement and no vali
 | Miner protocol | ALPN `quantus-miner/2` — node and miner must match |
 | Ports | `30333/TCP` public · `9833/UDP`, `9944`, `9615`, `9900` localhost only |
 
-Hash rate comes from the **GPU and the miner build** — not disk size or CPU cache. QPoW is not VRAM-hungry, so 8–12 GB is plenty. GPU mining runs roughly 500 MH/s–1.5 GH/s per modern card against ~15 MH/s per CPU thread. Linux ARM64 has a node but **no official miner binary**. Full requirements: [guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#hardware-requirements).
+Hash rate comes from the **GPU and the miner build** — not disk size or CPU cache. QPoW is not VRAM-hungry, so 8–12 GB is plenty. Expect roughly 500 MH/s–1.5 GH/s per modern card against ~15 MH/s per CPU thread. Linux ARM64 has a node but **no official miner binary**. Full requirements: [guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#hardware-requirements).
 
 > Some official docs and tools still label the unit `QUAN`. It is the same 21M-supply native token; do not confuse either ticker with unrelated coins.
 
 ---
 
-## 🔐 Security Essentials
+## Security Essentials
 
 - **Your 24 words never leave paper.** Part A needs only your `qz…` address; Part B needs only the derived inner hash. Never put the phrase on a rented machine.
 - Pass secrets by file (`--auth-token-file`), never inline — shell history is forever.
@@ -94,7 +94,7 @@ Hash rate comes from the **GPU and the miner build** — not disk size or CPU ca
 
 ---
 
-## 🔗 Links
+## Links
 
 **Official** — [quantus.com](https://quantus.com/) · [docs](https://docs.quantus.com/) · [QPoW deep dive](https://docs.quantus.com/deep-dives/qpow) · [miner protocol](https://docs.quantus.com/deep-dives/miner-protocol/) · [setup script](https://docs.quantus.com/scripts/quantus-mining.sh)
 
