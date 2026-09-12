@@ -6,7 +6,7 @@
 
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%20%7C%2026.04%20LTS-E95420?style=flat-square&logo=ubuntu&logoColor=white)](https://ubuntu.com/download/desktop)
 [![Quantus](https://img.shields.io/badge/Quantus-Mainnet-6C4DF6?style=flat-square)](https://quantus.com)
-[![GPU](https://img.shields.io/badge/GPU-NVIDIA%20CUDA-76B900?style=flat-square&logo=nvidia&logoColor=white)](https://docs.quantus.com/guides/mining/)
+[![GPU](https://img.shields.io/badge/GPU-NVIDIA%20CUDA-76B900?style=flat-square&logo=nvidia&logoColor=white)](https://docs.quantus.com/deep-dives/qpow)
 [![Boot](https://img.shields.io/badge/Boot-UEFI%20%C2%B7%20GPT-blue?style=flat-square)](https://rufus.ie/en/)
 [![Dual Boot](https://img.shields.io/badge/Windows-Preserved-0078D4?style=flat-square&logo=windows&logoColor=white)](https://ubuntu.com/tutorials/install-ubuntu-desktop)
 
@@ -25,11 +25,21 @@
 
 ## Scope
 
-This guide does one job: it turns a Windows machine into a working Ubuntu machine with a live NVIDIA driver. **No miner, no wallet, no seed phrase.**
+This document does exactly one job: it turns a Windows machine into a working Ubuntu machine with a live NVIDIA driver. **No miner, no wallet, no seed phrase, and no choice about pooling yet.**
 
-When you finish [Step 8](#step-8--final-check), continue at **[guide.md → Part A](guide.md#part-a--pool-mining-quanpool-pplns)**.
+**Where this ends:** at [Step 8](#step-8--final-check). From there you continue in the main guide, which starts with two shared steps and only then asks you to pick a route:
 
-Renting a GPU instead? → [vast.md](vast.md) · Network overview → [readme.md](readme.md)
+```text
+ubuntu.md  Step 1 → 8      you are here
+      ↓
+guide.md   Step 1  create a wallet
+guide.md   Step 2  verify the GPU   (a 2-minute re-check of what you built here)
+guide.md   Decision Point → Part A (pool) or Part B (own node)
+```
+
+Do not skip ahead to Part A or Part B from here. The wallet in guide.md Step 1 is a prerequisite for both.
+
+Renting a GPU instead? → [vast.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/vast.md) · Network overview → [README.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/README.md)
 
 **Why bother:** the fast CUDA path exists only on Linux. The Windows miner is **4–6× slower** on the same card — ~100 MH/s versus 400–450 MH/s on a mid-range RTX.
 
@@ -64,7 +74,7 @@ Three ground rules:
 
 1. **Bare metal.** Not WSL, not a VM.
 2. **Keep Windows.** One OS per physical disk. Avoid *Install alongside Windows*, which squeezes Ubuntu onto the Windows drive.
-3. **No seed phrase on this machine.** Wallet creation happens on your phone — [guide.md → Step 1](guide.md#step-1--create-a-wallet).
+3. **No seed phrase on this machine.** Wallet creation happens on your phone — [guide.md → Step 1](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#step-1--create-a-wallet).
 
 ---
 
@@ -226,6 +236,8 @@ gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-typ
 
 ## Step 8 — Final Check
 
+This is the end of this document. Tick every box before you leave it:
+
 - [ ] Ubuntu is on the disk from Step 4 only, and Windows still boots
 - [ ] `nvidia-smi` shows card, driver and CUDA version
 - [ ] You know how many GPUs `nvidia-smi -L` reports
@@ -233,7 +245,9 @@ gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-typ
 - [ ] `apt` reaches the internet
 - [ ] No seed phrase was typed on this machine
 
-✅ All ticked → **[guide.md → Part A: Pool Mining](guide.md#part-a--pool-mining-quanpool-pplns)** (or [Part B](guide.md#part-b--your-own-node-official-path) for your own node).
+✅ All ticked → continue at **[guide.md → Step 1: Create a Wallet](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#step-1--create-a-wallet)**.
+
+That wallet plus a quick GPU re-check in Step 2 are the shared setup for both routes; the [Decision Point](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#decision-point--pick-your-route) then sends you to **Part A** (pool, easiest at home) or **Part B** (your own node). If you want to read the trade-off before you get there: [The Two Routes](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#the-two-routes--a-or-b).
 
 ---
 
@@ -247,7 +261,7 @@ gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-typ
 | Installer refuses the disk | Intel RST/RAID is on, or it is part of a Windows dynamic volume |
 | Windows seems gone | Set the Windows drive first in the boot order. **Erase nothing** |
 | `nvidia-smi` empty or missing | `sudo ubuntu-drivers autoinstall`, disable Secure Boot, reboot |
-| Driver fine but hash rate low later | Not a driver issue — see [the benchmark table](guide.md#step-a2--benchmark-the-card) |
+| Driver fine but hash rate low later | Not a driver issue — see [the benchmark table](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md#step-a2--benchmark-the-card) |
 | Mining stops when idle | Re-apply Step 7 inside a graphical session |
 | No Wi-Fi after install | Use Ethernet, or `sudo ubuntu-drivers autoinstall` + reboot |
 
