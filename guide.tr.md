@@ -7,7 +7,7 @@
 
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%2B%20%7C%2026.04%20LTS-E95420?style=flat-square&logo=ubuntu&logoColor=white)](https://ubuntu.com)
 [![Quantus](https://img.shields.io/badge/Quantus-Mainnet-6C4DF6?style=flat-square)](https://quantus.com)
-[![Node](https://img.shields.io/badge/Node-v1.0.1%2B-brightgreen?style=flat-square)](https://github.com/Quantus-Network/chain/releases)
+[![Node](https://img.shields.io/badge/Node-v1.0.5%2B-brightgreen?style=flat-square)](https://github.com/Quantus-Network/chain/releases)
 [![Miner](https://img.shields.io/badge/Madenci%20Protokolü-quantus--miner%2F2-blue?style=flat-square)](https://docs.quantus.com/deep-dives/miner-protocol/)
 [![GPU](https://img.shields.io/badge/GPU-NVIDIA%20CUDA-76B900?style=flat-square&logo=nvidia&logoColor=white)](https://docs.quantus.com/deep-dives/qpow)
 
@@ -19,8 +19,8 @@
 
 > **Yazar:** HazenNetworkSolutions
 > **Ağ:** Quantus Mainnet (`--chain mainnet`)
-> **Sürümler:** `quantus-node` v1.0.1+ · `quantus-miner` v4.2.x · havuz madencisi 6.2.0
-> **Son Güncelleme:** Eylül 2026
+> **Sürümler:** `quantus-node` v1.0.5+ · `quantus-miner` v4.2.x · havuz madencisi 6.2.0
+> **Son Güncelleme:** Ekim 2026
 
 ---
 
@@ -482,8 +482,8 @@ Günlük kullanım:
 İki `latest` etiketinin birbirinden ayrışmasını beklemek yerine sürümleri sabitle:
 
 ```bash
-./quantus-mining.sh config set NODE_VERSION v1.0.1
-./quantus-mining.sh config set MINER_VERSION v4.2.0
+./quantus-mining.sh config set NODE_VERSION v1.0.5
+./quantus-mining.sh config set MINER_VERSION v4.2.1
 ./quantus-mining.sh stop
 ./quantus-mining.sh setup --force
 ./quantus-mining.sh start -d
@@ -500,16 +500,16 @@ sudo apt update
 sudo apt install -y curl wget tar unzip jq screen ufw ca-certificates
 mkdir -p ~/quantus && cd ~/quantus
 
-wget https://github.com/Quantus-Network/chain/releases/download/v1.0.1/quantus-node-v1.0.1-x86_64-unknown-linux-gnu.tar.gz
-tar -xzf quantus-node-v1.0.1-x86_64-unknown-linux-gnu.tar.gz
+wget https://github.com/Quantus-Network/chain/releases/download/v1.0.5/quantus-node-v1.0.5-x86_64-unknown-linux-gnu.tar.gz
+tar -xzf quantus-node-v1.0.5-x86_64-unknown-linux-gnu.tar.gz
 chmod +x quantus-node
 ./quantus-node --version
 
-wget https://github.com/Quantus-Network/quantus-miner/releases/download/v4.2.0/quantus-miner-linux-x86_64 -O quantus-miner
+wget https://github.com/Quantus-Network/quantus-miner/releases/download/v4.2.1/quantus-miner-linux-x86_64 -O quantus-miner
 chmod +x quantus-miner
 ```
 
-Güncel etiketler için [Releases](https://github.com/Quantus-Network/chain/releases) sayfasına bak — resmî öneri **node v1.0.1 veya üstü** ve iki depo birbirinden bağımsız sürümleniyor.
+Güncel etiketler için [Releases](https://github.com/Quantus-Network/chain/releases) sayfasına bak — güncel öneri **node v1.0.5 veya üstü** (v1.0.2-Qm ücret indirimli bir runtime yükseltmesi getirdi; v1.0.3–v1.0.5 senkronizasyon ve veritabanı sağlamlaştırma düzeltmeleri) ve iki depo birbirinden bağımsız sürümleniyor.
 
 Devam etmeden önce çiftin kimlik doğrulamalı protokolü konuştuğunu teyit et — iki komut da eşleşen bir satır basmalı:
 

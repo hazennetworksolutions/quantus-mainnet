@@ -6,7 +6,7 @@
 
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%2B%20%7C%2026.04%20LTS-E95420?style=flat-square&logo=ubuntu&logoColor=white)](https://ubuntu.com)
 [![Quantus](https://img.shields.io/badge/Quantus-Mainnet-6C4DF6?style=flat-square)](https://quantus.com)
-[![Node](https://img.shields.io/badge/Node-v1.0.1%2B-brightgreen?style=flat-square)](https://github.com/Quantus-Network/chain/releases)
+[![Node](https://img.shields.io/badge/Node-v1.0.5%2B-brightgreen?style=flat-square)](https://github.com/Quantus-Network/chain/releases)
 [![Consensus](https://img.shields.io/badge/Konsensus-QPoW%20%C2%B7%20Poseidon2-blue?style=flat-square)](https://docs.quantus.com/deep-dives/qpow)
 [![GPU](https://img.shields.io/badge/GPU-NVIDIA%20CUDA-76B900?style=flat-square&logo=nvidia&logoColor=white)](https://docs.quantus.com/deep-dives/qpow)
 
@@ -18,8 +18,8 @@
 
 > **Yazar:** HazenNetworkSolutions
 > **Ağ:** Quantus Mainnet (`--chain mainnet`)
-> **Sürümler:** `quantus-node` v1.0.1+ · `quantus-miner` v4.2.x · havuz madencisi 6.2.0
-> **Son Güncelleme:** Eylül 2026
+> **Sürümler:** `quantus-node` v1.0.5+ · `quantus-miner` v4.2.x · havuz madencisi 6.2.0
+> **Son Güncelleme:** Ekim 2026
 
 ---
 

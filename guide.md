@@ -7,7 +7,7 @@
 
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%2B%20%7C%2026.04%20LTS-E95420?style=flat-square&logo=ubuntu&logoColor=white)](https://ubuntu.com)
 [![Quantus](https://img.shields.io/badge/Quantus-Mainnet-6C4DF6?style=flat-square)](https://quantus.com)
-[![Node](https://img.shields.io/badge/Node-v1.0.1%2B-brightgreen?style=flat-square)](https://github.com/Quantus-Network/chain/releases)
+[![Node](https://img.shields.io/badge/Node-v1.0.5%2B-brightgreen?style=flat-square)](https://github.com/Quantus-Network/chain/releases)
 [![Miner](https://img.shields.io/badge/Miner%20Protocol-quantus--miner%2F2-blue?style=flat-square)](https://docs.quantus.com/deep-dives/miner-protocol/)
 [![GPU](https://img.shields.io/badge/GPU-NVIDIA%20CUDA-76B900?style=flat-square&logo=nvidia&logoColor=white)](https://docs.quantus.com/deep-dives/qpow)
 
@@ -19,8 +19,8 @@
 
 > **Author:** HazenNetworkSolutions
 > **Network:** Quantus Mainnet (`--chain mainnet`)
-> **Versions:** `quantus-node` v1.0.1+ · `quantus-miner` v4.2.x · pool miner 6.2.0
-> **Last Updated:** September 2026
+> **Versions:** `quantus-node` v1.0.5+ · `quantus-miner` v4.2.x · pool miner 6.2.0
+> **Last Updated:** October 2026
 
 ---
 
@@ -482,8 +482,8 @@ Day-to-day control:
 Pin an explicit pair instead of letting two `latest` tags drift apart:
 
 ```bash
-./quantus-mining.sh config set NODE_VERSION v1.0.1
-./quantus-mining.sh config set MINER_VERSION v4.2.0
+./quantus-mining.sh config set NODE_VERSION v1.0.5
+./quantus-mining.sh config set MINER_VERSION v4.2.1
 ./quantus-mining.sh stop
 ./quantus-mining.sh setup --force
 ./quantus-mining.sh start -d
@@ -500,16 +500,16 @@ sudo apt update
 sudo apt install -y curl wget tar unzip jq screen ufw ca-certificates
 mkdir -p ~/quantus && cd ~/quantus
 
-wget https://github.com/Quantus-Network/chain/releases/download/v1.0.1/quantus-node-v1.0.1-x86_64-unknown-linux-gnu.tar.gz
-tar -xzf quantus-node-v1.0.1-x86_64-unknown-linux-gnu.tar.gz
+wget https://github.com/Quantus-Network/chain/releases/download/v1.0.5/quantus-node-v1.0.5-x86_64-unknown-linux-gnu.tar.gz
+tar -xzf quantus-node-v1.0.5-x86_64-unknown-linux-gnu.tar.gz
 chmod +x quantus-node
 ./quantus-node --version
 
-wget https://github.com/Quantus-Network/quantus-miner/releases/download/v4.2.0/quantus-miner-linux-x86_64 -O quantus-miner
+wget https://github.com/Quantus-Network/quantus-miner/releases/download/v4.2.1/quantus-miner-linux-x86_64 -O quantus-miner
 chmod +x quantus-miner
 ```
 
-Check [Releases](https://github.com/Quantus-Network/chain/releases) for current tags — official guidance is **node v1.0.1 or newer**, and the two repositories version independently.
+Check [Releases](https://github.com/Quantus-Network/chain/releases) for current tags — current guidance is **node v1.0.5 or newer** (v1.0.2-Qm carried a runtime upgrade with fee reductions; v1.0.3–v1.0.5 are sync and database hardening fixes), and the two repositories version independently.
 
 Confirm the pair speaks the authenticated protocol **before** going further — both commands must print a match:
 
