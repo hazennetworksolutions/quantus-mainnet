@@ -19,7 +19,7 @@
 
 > **Yazar:** HazenNetworkSolutions
 > **Ağ:** Quantus Mainnet (`--chain mainnet`)
-> **Sürümler:** `quantus-node` v1.0.5+ · `quantus-miner` v4.2.x · havuz madencisi 6.2.0
+> **Sürümler:** `quantus-node` v1.0.5+ · `quantus-miner` v4.2.x · havuz madencisi 6.4.0
 > **Son Güncelleme:** Ekim 2026
 
 ---
@@ -202,6 +202,7 @@ Sadece **madenci** çalıştırırsın. Madenci dışa doğru bir havuz node'una
 | `30333/TCP` | Node P2P | B | İnternete bakabilecek tek port. Opsiyonel — dışa bağlantı senkron için yeter |
 | `9833/UDP` | Madenci ↔ kendi node'un (QUIC) | B | **Sadece localhost veya VPN.** `0.0.0.0`'a bağlanır; onu yalnızca güvenlik duvarın korur |
 | `9834/UDP` | Havuz madencisi → havuz node'u | A | **Sadece dışa.** Dışa UDP kapalıysa sonsuz yeniden bağlanma döngüsü |
+| Stratum portu (TCP) | Havuz madencisi → havuz node'u, madenci 6.3.0+ | A | **Sadece dışa.** Port **Start mining**'de yazar; UDP kapalıyken yedek yol |
 | `9944` | Node RPC | B | Localhost |
 | `9615` | Node Prometheus metrikleri | B | Localhost |
 | `9900` | Madenci metrikleri / `hive-stats` | A + B | Localhost |
@@ -304,7 +305,7 @@ sudo mkdir -p /opt/quantus
 sudo chown "$USER:$USER" /opt/quantus
 cd /opt/quantus
 
-wget -O quanpool-miner https://download.quanpool.com/quanpool-miner-6.2.0-linux-x86_64
+wget -O quanpool-miner https://download.quanpool.com/quanpool-miner-6.4.0-linux-x86_64
 chmod u+x quanpool-miner
 ./quanpool-miner --version
 ```
@@ -370,6 +371,8 @@ cd /opt/quantus
 ```
 
 `<HAVUZ_HOST>` yerine **Start mining**'deki adresi yaz, `--gpu-devices` değerini `nvidia-smi -L` çıktısındaki kart sayısına ayarla (hepsini kullanmak için parametreyi at).
+
+> **QUIC yerine Stratum (TCP) — madenci 6.3.0+.** Ağın dışa UDP'yi engelliyorsa **Start mining**'de **Connection → Stratum (TCP)** seç. Sayfa o zaman `--node-addr stratum+ssl://<HAVUZ_HOST>:<port>` ve `--auth-token qzADRESİN.workeradı` içeren, **`--tls-cert-sha256` içermeyen** bir komut üretir: sertifika herkese açık (Let's Encrypt), pinlenecek bir şey yok. Forward veya proxy arkasındaysan orada **TLS, no cert check** seç — komuta `--tls-insecure` eklenir (madenci 6.3.1+). Komutu sayfada göründüğü gibi kopyala; havuz mu solo mu olduğu bayrakla değil porta göre belirlenir.
 
 İlk dakikada sağlıklı belirtiler:
 
@@ -729,7 +732,7 @@ Birden fazla madenci **aynı** `qz…` adresine ödeme yapabilir; PPLNS payları
 
 | Belirti | Ne kontrol edilir |
 |---|---|
-| `timed out` / sonsuz yeniden bağlanma | Havuz portuna dışa **UDP**. Ev güvenlik duvarları ve bazı ISS hatları QUIC'i engeller — telefon hotspot'undan test et |
+| `timed out` / sonsuz yeniden bağlanma | Havuz portuna dışa **UDP**. Ev güvenlik duvarları ve bazı ISS hatları QUIC'i engeller — telefon hotspot'undan test et veya madenci 6.3.0+ ile Stratum (TCP)'ye geç |
 | `certificate` / `fingerprint` hatası | TLS pinini **Start mining**'den yeniden kopyala; tam 64 hex karakter |
 | Worker sitede hiç görünmüyor | `auth-token` içindeki adres sorguladığından farklı ya da worker adı kurallara uymuyor. 2–3 dakika tanı |
 | Modern kartta ~100 MH/s benchmark | CUDA derlemesi değil — yanlış binary ya da sürücü. `nvidia-smi`'ye bak |

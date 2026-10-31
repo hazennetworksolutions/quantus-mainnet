@@ -17,8 +17,8 @@
 
 > **Author:** HazenNetworkSolutions
 > **Route:** pool mining only — the rented-GPU variant of [guide.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.md) Part A
-> **Versions:** pool miner 6.2.0
-> **Last Updated:** September 2026
+> **Versions:** pool miner 6.4.0
+> **Last Updated:** October 2026
 
 ---
 
@@ -90,7 +90,7 @@ Use `/workspace` when the image provides it — it is the persistent volume.
 mkdir -p /workspace/quantus && cd /workspace/quantus
 apt-get update -qq && apt-get install -y -qq wget curl ca-certificates netcat-openbsd jq
 
-wget -O quanpool-miner https://download.quanpool.com/quanpool-miner-6.2.0-linux-x86_64
+wget -O quanpool-miner https://download.quanpool.com/quanpool-miner-6.4.0-linux-x86_64
 chmod u+x quanpool-miner
 ./quanpool-miner --version
 ```
@@ -151,7 +151,7 @@ cd /workspace/quantus
 
 Healthy within a minute: GPU utilisation at 95–100%, `SHARE FOUND` lines in the log, and `hive-stats` reporting a hash rate with zero rejects. A burst of stale-job messages at startup is normal.
 
-If it loops on `timed out`, outbound UDP is blocked on this host — destroy it and rent another. `Ctrl+C` once it looks healthy.
+If it loops on `timed out`, outbound UDP is blocked on this host — destroy it and rent another, or (miner 6.3.0+) choose **Connection → Stratum (TCP)** on **Start mining** and use the command it prints. `Ctrl+C` once it looks healthy.
 
 ---
 

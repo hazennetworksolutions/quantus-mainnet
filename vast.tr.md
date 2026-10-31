@@ -17,8 +17,8 @@
 
 > **Yazar:** HazenNetworkSolutions
 > **Yol:** yalnızca havuz madenciliği — [guide.tr.md](https://github.com/hazennetworksolutions/quantus-mainnet/blob/main/guide.tr.md) Bölüm A'nın kiralık GPU varyantı
-> **Sürümler:** havuz madencisi 6.2.0
-> **Son Güncelleme:** Eylül 2026
+> **Sürümler:** havuz madencisi 6.4.0
+> **Son Güncelleme:** Ekim 2026
 
 ---
 
@@ -90,7 +90,7 @@ nvidia-smi -L
 mkdir -p /workspace/quantus && cd /workspace/quantus
 apt-get update -qq && apt-get install -y -qq wget curl ca-certificates netcat-openbsd jq
 
-wget -O quanpool-miner https://download.quanpool.com/quanpool-miner-6.2.0-linux-x86_64
+wget -O quanpool-miner https://download.quanpool.com/quanpool-miner-6.4.0-linux-x86_64
 chmod u+x quanpool-miner
 ./quanpool-miner --version
 ```
@@ -151,7 +151,7 @@ cd /workspace/quantus
 
 Bir dakika içinde sağlıklı görüntü: %95–100 GPU kullanımı, logda `SHARE FOUND` satırları ve `hive-stats` çıktısında sıfır retle birlikte bir hash hızı. Açılışta bir grup stale iş mesajı normaldir.
 
-`timed out` döngüsüne giriyorsa bu host'ta dışa UDP kapalı — yok et ve başkasını kirala. Sağlıklı göründüğünde `Ctrl+C`.
+`timed out` döngüsüne giriyorsa bu host'ta dışa UDP kapalı — yok et ve başkasını kirala veya (madenci 6.3.0+) **Start mining**'de **Connection → Stratum (TCP)** seçip sayfanın verdiği komutu kullan. Sağlıklı göründüğünde `Ctrl+C`.
 
 ---
 

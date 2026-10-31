@@ -18,7 +18,7 @@
 
 > **Yazar:** HazenNetworkSolutions
 > **Ağ:** Quantus Mainnet (`--chain mainnet`)
-> **Sürümler:** `quantus-node` v1.0.5+ · `quantus-miner` v4.2.x · havuz madencisi 6.2.0
+> **Sürümler:** `quantus-node` v1.0.5+ · `quantus-miner` v4.2.x · havuz madencisi 6.4.0
 > **Son Güncelleme:** Ekim 2026
 
 ---

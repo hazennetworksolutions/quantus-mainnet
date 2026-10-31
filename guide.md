@@ -19,7 +19,7 @@
 
 > **Author:** HazenNetworkSolutions
 > **Network:** Quantus Mainnet (`--chain mainnet`)
-> **Versions:** `quantus-node` v1.0.5+ · `quantus-miner` v4.2.x · pool miner 6.2.0
+> **Versions:** `quantus-node` v1.0.5+ · `quantus-miner` v4.2.x · pool miner 6.4.0
 > **Last Updated:** October 2026
 
 ---
@@ -202,6 +202,7 @@ Pick **Part B** if:
 | `30333/TCP` | Node P2P | B | The only port that may face the internet. Optional — outbound peering syncs fine |
 | `9833/UDP` | Miner ↔ your own node (QUIC) | B | **Localhost or VPN only.** It binds `0.0.0.0`; only your firewall protects it |
 | `9834/UDP` | Pool miner → pool node | A | **Outbound only.** Blocked outbound UDP = endless reconnect loop |
+| Stratum port (TCP) | Pool miner → pool node, miner 6.3.0+ | A | **Outbound only.** Port shown on **Start mining**; the fallback when UDP is blocked |
 | `9944` | Node RPC | B | Localhost |
 | `9615` | Node Prometheus metrics | B | Localhost |
 | `9900` | Miner metrics / `hive-stats` | A + B | Localhost |
@@ -304,7 +305,7 @@ sudo mkdir -p /opt/quantus
 sudo chown "$USER:$USER" /opt/quantus
 cd /opt/quantus
 
-wget -O quanpool-miner https://download.quanpool.com/quanpool-miner-6.2.0-linux-x86_64
+wget -O quanpool-miner https://download.quanpool.com/quanpool-miner-6.4.0-linux-x86_64
 chmod u+x quanpool-miner
 ./quanpool-miner --version
 ```
@@ -370,6 +371,8 @@ cd /opt/quantus
 ```
 
 Replace `<POOL_HOST>` with the address from **Start mining**, and set `--gpu-devices` to the card count from `nvidia-smi -L` (omit the flag to use all of them).
+
+> **Stratum (TCP) instead of QUIC — miner 6.3.0+.** If your network blocks outbound UDP, set **Connection → Stratum (TCP)** on **Start mining**. The page then prints a command with `--node-addr stratum+ssl://<POOL_HOST>:<port>` and `--auth-token qzYOURADDRESS.workername`, and **no** `--tls-cert-sha256`: the certificate is public (Let's Encrypt), so there is nothing to pin. Behind a forward or proxy, pick **TLS, no cert check** there — it adds `--tls-insecure` (miner 6.3.1+). Copy that command exactly as shown; pool or solo is decided by the port, not by a flag.
 
 Healthy signs within the first minute:
 
@@ -729,7 +732,7 @@ Several miners can pay into the **same** `qz…` address; PPLNS shares add up.
 
 | Symptom | What to check |
 |---|---|
-| `timed out` / endless reconnect | Outbound **UDP** to the pool port. Home firewalls and some ISP paths block QUIC — test from a phone hotspot |
+| `timed out` / endless reconnect | Outbound **UDP** to the pool port. Home firewalls and some ISP paths block QUIC — test from a phone hotspot, or switch to Stratum (TCP) with miner 6.3.0+ |
 | `certificate` / `fingerprint` error | Re-copy the TLS pin from **Start mining**; exactly 64 hex characters |
 | Worker never appears on the site | Address in `auth-token` differs from the one you looked up, or the worker name breaks the rules. Allow 2–3 minutes |
 | Benchmark ~100 MH/s on a modern card | Not the CUDA build — wrong binary or driver. Check `nvidia-smi` |

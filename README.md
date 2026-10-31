@@ -18,7 +18,7 @@
 
 > **Author:** HazenNetworkSolutions
 > **Network:** Quantus Mainnet (`--chain mainnet`)
-> **Versions:** `quantus-node` v1.0.5+ · `quantus-miner` v4.2.x · pool miner 6.2.0
+> **Versions:** `quantus-node` v1.0.5+ · `quantus-miner` v4.2.x · pool miner 6.4.0
 > **Last Updated:** October 2026
 
 ---
