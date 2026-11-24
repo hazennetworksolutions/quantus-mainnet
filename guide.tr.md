@@ -28,7 +28,7 @@
 
 **Önce oku**
 
-- [Madencilik Nasıl İşliyor](#madencilik-nasıl-işliyor)
+- [Madencilik Nasıl İşliyor](#madencilik-nasıl-i̇şliyor)
 - [Hangi Yol — A mı B mi](#hangi-yol--a-mı-b-mi)
 - [Donanım Gereksinimleri](#donanım-gereksinimleri)
 - [Portlar ve Uç Noktalar](#portlar-ve-uç-noktalar)
@@ -45,7 +45,7 @@
   - [A1 — Havuz Madencisini Kur](#a1--havuz-madencisini-kur)
   - [A2 — Kartı Benchmark Et](#a2--kartı-benchmark-et)
   - [A3 — Token ve TLS Pini](#a3--token-ve-tls-pini)
-  - [A4 — İlk Manuel Çalıştırma](#a4--ilk-manuel-çalıştırma)
+  - [A4 — İlk Manuel Çalıştırma](#a4--i̇lk-manuel-çalıştırma)
   - [A5 — systemd Servisi](#a5--systemd-servisi)
   - [A6 — Havuzda Doğrula](#a6--havuzda-doğrula)
   - [Bölüm A Bitiş Çizgisi](#bölüm-a-bitiş-çizgisi)
@@ -60,7 +60,7 @@
 
 **Referans — iki yol için de**
 
-- [İzleme ve Günlük Komutlar](#izleme-ve-günlük-komutlar)
+- [İzleme ve Günlük Komutlar](#i̇zleme-ve-günlük-komutlar)
 - [Performans Referansı](#performans-referansı)
 - [Güvenlik Duvarı](#güvenlik-duvarı)
 - [Çoklu Makine Çalıştırmak](#çoklu-makine-çalıştırmak)
@@ -447,7 +447,7 @@ Sonra [quanpool.com](https://quanpool.com/)'u aç, `qz…` adresini sorgu kutusu
 3. `hive-stats` kabul edilen payları artıyor, ret sıfırda.
 4. Worker'ın havuz sorgu sayfasında görünüyor ve bekleyen bakiye artıyor.
 
-Başka kurulacak bir şey yok: node yok, senkron yok, inner hash yok. [İzleme](#izleme-ve-günlük-komutlar), [Çoklu Makine](#çoklu-makine-çalıştırmak) ya da [Ekonomi](#ekonomi--ne-beklemeli) bölümlerine geç. Sonradan kendi node'unu istemedikçe **Bölüm B'yi atla** — isteyince önce [Sonradan Yol Değiştirmek](#sonradan-yol-değiştirmek)'i oku.
+Başka kurulacak bir şey yok: node yok, senkron yok, inner hash yok. [İzleme](#i̇zleme-ve-günlük-komutlar), [Çoklu Makine](#çoklu-makine-çalıştırmak) ya da [Ekonomi](#ekonomi--ne-beklemeli) bölümlerine geç. Sonradan kendi node'unu istemedikçe **Bölüm B'yi atla** — isteyince önce [Sonradan Yol Değiştirmek](#sonradan-yol-değiştirmek)'i oku.
 
 ---
 
@@ -624,7 +624,7 @@ Betikle ve elle kurulumda aynı:
 4. Madenci bağlı, `nvidia-smi` %95–100 kullanım gösteriyor ve node logunda `Broadcasting job` var.
 5. `ufw status` yalnızca `22/tcp` ve `30333/tcp` izin veriyor, **başka hiçbir şey yok**.
 
-Artık ödüller tam blok halinde, düzensiz aralıklarla, B3'teki wormhole adresine gelir — cüzdan uygulamasından ya da explorer'dan kontrol et. [İzleme](#izleme-ve-günlük-komutlar) ve ardından [Ekonomi](#ekonomi--ne-beklemeli) bölümüne geç ki bloklar arasındaki sessizlik seni endışelendirmesin.
+Artık ödüller tam blok halinde, düzensiz aralıklarla, B3'teki wormhole adresine gelir — cüzdan uygulamasından ya da explorer'dan kontrol et. [İzleme](#i̇zleme-ve-günlük-komutlar) ve ardından [Ekonomi](#ekonomi--ne-beklemeli) bölümüne geç ki bloklar arasındaki sessizlik seni endışelendirmesin.
 
 ---
 

@@ -102,7 +102,7 @@ Hash rate comes from the **GPU and the miner build** — not disk size or CPU ca
 
 **Tools** — [wallet](https://www.quantus.com/wallet/) · [explorer](https://explorer.quantus.com) · [telemetry](https://telemetry.quantus.cat/) · [linktr.ee](https://linktr.ee/quantusnetwork)
 
-**Community** — [quanpool.com](https://quanpool.com/) (unofficial pool) · [Discord](https://discord.gg/vPkuc8eu42) · [Telegram](https://t.me/quantusnetwork) · [research](https://research.quantus.com)
+**Community** — [quanpool.com](https://quanpool.com/) (unofficial pool) · [Discord](https://discord.gg/vPkuc8eu42) · [Telegram](https://t.me/quantusnetwork)
 
 ---
 

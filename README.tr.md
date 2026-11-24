@@ -102,7 +102,7 @@ Hash hızı **GPU'dan ve madenci derlemesinden** gelir — disk boyutundan ya da
 
 **Araçlar** — [cüzdan](https://www.quantus.com/wallet/) · [explorer](https://explorer.quantus.com) · [telemetri](https://telemetry.quantus.cat/) · [linktr.ee](https://linktr.ee/quantusnetwork)
 
-**Topluluk** — [quanpool.com](https://quanpool.com/) (resmî olmayan havuz) · [Discord](https://discord.gg/vPkuc8eu42) · [Telegram](https://t.me/quantusnetwork) · [araştırma](https://research.quantus.com)
+**Topluluk** — [quanpool.com](https://quanpool.com/) (resmî olmayan havuz) · [Discord](https://discord.gg/vPkuc8eu42) · [Telegram](https://t.me/quantusnetwork)
 
 ---
 
